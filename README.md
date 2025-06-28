@@ -1,4 +1,4 @@
-# ETHHuangshan
+# ETH - Huangshan
 ### 什么是 ETH 黄山？
 
 一场不为输赢，只为共创的无限游戏；
