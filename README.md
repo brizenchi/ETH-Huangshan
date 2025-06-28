@@ -54,6 +54,7 @@ ZK & Privacy｜构建可信与隐私并重的 Web3 应用
 🥇**Blockchain for Good Award 一等奖：400 USDT**
 
 🥈**Blockchain for Good Award 二等奖：300 USDT**
+
 ---
 
 ### 项目截止提交时间
