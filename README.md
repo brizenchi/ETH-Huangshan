@@ -120,7 +120,7 @@ README.md 文件应包含以下关键信息：
 
 ### 提交流程
 
-1. 进入 Mini 黑客松官方 [GitHub](https://github.com/KeyMap-CC/ETHHuangshan) 仓库 —— `ETH-HuangShan`。
+1. 进入 Mini 黑客松官方 [GitHub](https://github.com/KeyMap-CC/ETH-Huangshan) 仓库 —— `ETH-HuangShan`。
 
 2. 选择 "**Fork**" 以将官方仓库复制到您的个人 GitHub 仓库；
 
@@ -129,7 +129,7 @@ README.md 文件应包含以下关键信息：
 3. 将 Fork 之后的仓库克隆到您的本地设备：
 
    ```
-   git clone https://github.com/YOUR_USERNAME/ETHHuangshan.git
+   git clone https://github.com/YOUR_USERNAME/ETH-Huangshan.git
    ```
 
 4. 在本地整理文件：首先，创建一个项目文件夹（`ID-Name`），并将要提交的文件放入该文件夹内。**请勿修改或提交该文件夹以外的任何文件**。
