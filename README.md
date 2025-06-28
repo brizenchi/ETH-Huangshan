@@ -120,7 +120,7 @@ README.md 文件应包含以下关键信息：
 
 ### 提交流程
 
-1. 进入 Mini 黑客松官方 [GitHub](https://github.com/KeyMap-CC/ETH-Huangshan) 仓库 —— `ETH-HuangShan`。
+1. 进入 ETH黄山 [GitHub](https://github.com/KeyMap-CC/ETH-Huangshan) 仓库 —— `ETH-HuangShan`。
 
 2. 选择 "**Fork**" 以将官方仓库复制到您的个人 GitHub 仓库；
 
