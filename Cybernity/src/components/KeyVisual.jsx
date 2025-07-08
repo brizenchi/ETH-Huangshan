@@ -37,6 +37,14 @@ import * as THREE from 'three';
  * 2.  **调整速度**: 降低了旋转速度，感觉更宏大、静谧。
  * 3.  **调整大小**: 减小了星星的整体尺寸，看起来更精致、遥远。
  * 4.  **调整距离**: 增大了星空球体的半径，让天幕感觉离用户更远。
+ * 
+ * v3版改进点:
+ * 1. **中空球体分布**: 星星不再挤在中心，而是分布在一个中空的球体内，为中心区域留出空间。
+ * 2. **多彩星光**: 引入了色盘，星星的颜色有了微妙的变化。
+ * 
+ * v4版改进点:
+ * 1. **星座连线**: 随机在邻近的星星之间创建优雅的连线，形成星座。
+ * 2. **性能优化**: 使用了排序算法来加速邻近星星的查找，确保动画流畅。
  */
 function CustomStars() {
   const ref = useRef();
@@ -50,7 +58,7 @@ function CustomStars() {
   });
 
   // 使用useMemo来缓存星星的几何体和圆形纹理，确保它们只被计算和创建一次，以优化性能。
-  const [geometry, texture] = useMemo(() => {
+  const [geometry, lineGeometry, texture] = useMemo(() => {
     // --- 创建圆形纹理 ---
     // 1. 创建一个临时的canvas元素
     const canvas = document.createElement('canvas');
@@ -121,26 +129,102 @@ function CustomStars() {
     geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
     geo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
     
-    return [geo, tex];
+    // --- v4 新增：创建星座连线 ---
+    const linePoints = [];
+    // 连接距离：决定了星星之间多远可以形成连线
+    const connectionDistance = 8;
+    // 每个星星的最大连接数，防止出现过于密集的"蜘蛛网"
+    const maxConnectionsPerNode = 2;
+    // 节点概率：只有一部分星星（5%）会成为星座的"节点"去寻找连接
+    const nodeProbability = 0.05;
+
+    // 为了高效查找，我们创建一个包含3D向量和连接数状态的对象数组
+    const points3D = [];
+    for (let i = 0; i < count; i++) {
+        points3D.push({
+            vec: new THREE.Vector3(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]),
+            connections: 0,
+        });
+    }
+
+    // 性能优化：按x坐标排序，这样我们只需要在邻近的子集里搜索，而不是全局搜索
+    points3D.sort((a, b) => a.vec.x - b.vec.x);
+
+    for (let i = 0; i < count; i++) {
+        // 如果这个点不被选为节点，或者已经达到最大连接数，则跳过
+        if (Math.random() > nodeProbability || points3D[i].connections >= maxConnectionsPerNode) {
+            continue;
+        }
+
+        // 从当前点开始，向右（x更大的方向）搜索邻居
+        for (let j = i + 1; j < count; j++) {
+            const pointA = points3D[i];
+            const pointB = points3D[j];
+
+            // 性能优化：如果x轴的距离已经超过了总连接距离，后续的点只会更远，可以提前终止
+            if (pointB.vec.x - pointA.vec.x > connectionDistance) {
+                break;
+            }
+
+            // 如果潜在的邻居点也已经满载，则跳过
+            if (pointB.connections >= maxConnectionsPerNode) {
+                continue;
+            }
+            
+            // 计算两点之间的实际三维距离
+            const dist = pointA.vec.distanceTo(pointB.vec);
+
+            if (dist < connectionDistance) {
+                // 如果距离合适，创建一条连线
+                linePoints.push(pointA.vec.x, pointA.vec.y, pointA.vec.z);
+                linePoints.push(pointB.vec.x, pointB.vec.y, pointB.vec.z);
+
+                // 更新两点的连接计数
+                pointA.connections++;
+                pointB.connections++;
+
+                // 如果当前节点已达到最大连接数，停止为它寻找新的连接
+                if (pointA.connections >= maxConnectionsPerNode) {
+                    break;
+                }
+            }
+        }
+    }
+
+    const lineGeo = new THREE.BufferGeometry();
+    lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(linePoints, 3));
+    
+    return [geo, lineGeo, tex];
   }, []);
 
   return (
-    <points ref={ref} geometry={geometry}>
-      <pointsMaterial 
-        // 减小基础尺寸
-        size={0.3} 
-        vertexColors
-        sizeAttenuation
-        // 将我们创建的圆形纹理应用到map属性上
-        map={texture}
-        // 设置为透明，因为我们的纹理有透明部分
-        transparent={true}
-        // 设置混合模式为叠加，可以产生更亮的辉光效果
-        blending={THREE.AdditiveBlending}
-        // 关闭深度写入，这通常用于处理透明物体的渲染排序问题，可以避免一些视觉上的瑕疵
-        depthWrite={false}
-      />
-    </points>
+    <group ref={ref}>
+      <points geometry={geometry}>
+        <pointsMaterial 
+          // 减小基础尺寸
+          size={0.3} 
+          vertexColors
+          sizeAttenuation
+          // 将我们创建的圆形纹理应用到map属性上
+          map={texture}
+          // 设置为透明，因为我们的纹理有透明部分
+          transparent={true}
+          // 设置混合模式为叠加，可以产生更亮的辉光效果
+          blending={THREE.AdditiveBlending}
+          // 关闭深度写入，这通常用于处理透明物体的渲染排序问题，可以避免一些视觉上的瑕疵
+          depthWrite={false}
+        />
+      </points>
+      <lineSegments geometry={lineGeometry}>
+        <lineBasicMaterial 
+          color="white" 
+          transparent 
+          opacity={0.15}
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
+        />
+      </lineSegments>
+    </group>
   );
 }
 
