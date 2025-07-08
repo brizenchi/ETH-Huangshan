@@ -1,0 +1,43 @@
+/* 
+  文件注释：index.css (全局样式)
+
+  目标：
+  为整个 Cybernity 应用提供基础的、全局性的 CSS 样式。
+  这里的样式是最低层级的，用于设定整体的布局、字体、颜色等基础，确保应用在所有组件中都有一致的视觉底座。
+
+  核心思路：
+  1.  **重置 (Reset)**：通过将 `*` 和 `::before`, `::after` 的 `box-sizing` 设置为 `border-box`，我们统一了元素的盒模型计算方式，避免了 padding 和 border 对元素尺寸计算的干扰，这是现代 CSS 布局的基石。
+  2.  **全屏布局 (Full-Screen Layout)**：将 `html`, `body`, 和 React 的根节点 `#root` 的高度和宽度都设置为 `100%`，确保我们的应用，特别是3D场景，能够完全填充浏览器视口，提供沉浸式体验。
+  3.  **背景与前景**：
+      - `background-color`: 设置为 `#000` (曜石黑)，直接对应主视觉方案中的主色调，营造深邃、浩瀚的宇宙背景感。
+      - `color`: 设置为 `#E6F1FF` (意识白/月光银)，作为默认的前景（文字）颜色，保证在黑色背景上的可读性，同时也符合高光/点缀色的设定，传递纯粹、科技的感觉。
+  4.  **字体设置**: 根据用户反馈，将字体更换为经典的衬线字体(Serif)，如Georgia, Times New Roman等。
+      这能更好地传递项目所需的人文关怀、历史感与情感传承的核心理念，与冰冷的科技感形成平衡。
+  5.  **消除边距**：重置 `body` 的 `margin` 为 `0`，消除浏览器默认的边距，确保我们的全屏布局不会有意外的白边。
+*/
+
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /*
+  注释：
+  添加 overflow: hidden 来防止任何潜在的内容溢出导致出现滚动条。
+  这对于保持全屏3D场景的沉浸感至关重要。
+  */
+}
+
+body {
+  /* 选用一个经典的衬线字体栈，Georgia 和 Times New Roman 是最广泛支持的，能确保在不同设备上都有一致的优雅体验。 */
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  background: #000; /* 曜石黑 - 主背景色 */
+  color: #E6F1FF; /* 意识白 - 默认文字颜色 */
+}

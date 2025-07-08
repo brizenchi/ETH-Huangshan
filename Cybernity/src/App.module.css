@@ -1,0 +1,67 @@
+/*
+  文件注释：App.module.css (App 组件专属样式)
+
+  目标：
+  为 App.jsx 组件提供局部作用域的样式，主要负责布局和文本浮层的样式。
+
+  核心思路：
+  1.  **`.appContainer`**:
+      -   `position: relative;`: 这是关键。将主容器设置为相对定位，为的是给子元素 `.overlay` 提供一个绝对定位的上下文。这样，`.overlay` 的 `top: 0`, `left: 0` 等就会相对于 `.appContainer` 而不是整个视口，确保浮层能精确地覆盖在我们的3D场景之上。
+      -   `width: 100%; height: 100%;`: 继承并确保容器占满由 index.css 定义的全屏空间。
+
+  2.  **`.overlay`**:
+      -   `position: absolute;`: 将浮层从正常的文档流中脱离，使其可以叠加在其它元素（即3D canvas）之上。
+      -   `top: 0; left: 0;`: 定位到其父容器（`.appContainer`）的左上角。
+      -   `width: 100%; height: 100%;`: 确保浮层与父容器等大，覆盖整个屏幕。
+      -   `display: flex; flex-direction: column;`: 使用 Flexbox 布局，并将主轴方向设为垂直，这样标题和Slogan就会垂直排列。
+      -   `justify-content: center; align-items: center;`: Flexbox 的核心属性，分别用于在主轴（垂直）和交叉轴（水平）上居中其内容。最终效果就是让内部的文本块在屏幕上完美居中。
+      -   `text-align: center;`: 确保文本本身是居中对齐的。
+      -   `pointer-events: none;`: 这是一个非常重要的技巧。此设置让浮层本身对鼠标事件"透明"，用户的点击、拖拽等操作将能够"穿透"这个浮层，直接与下方的3D场景交互。如果未来浮层中有按钮等需要交互的元素，则需要将该元素的 `pointer-events` 设置回 `auto`。
+
+  3.  **文本样式 (`.overlay h1`, `.overlay p`)**:
+      -   为了防止文本内容影响布局，将它们的 `pointer-events` 设置为 `auto`，这样即使用户的鼠标悬浮在文字上，也不会影响与背景的交互。
+      -   为标题 `h1` 和段落 `p` 设置了不同的字体大小、间距和透明度，创造出视觉层次感。`text-shadow` 属性为文字添加了微妙的光晕效果，使其在可能很亮的3D背景前依然保持清晰可读，同时也增强了科技感。
+*/
+
+.appContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  pointer-events: none; /* 允许鼠标事件穿透浮层 */
+}
+
+.overlay h1,
+.overlay p {
+  margin: 0;
+  padding: 0;
+  pointer-events: auto; /* 但允许选择或与文本交互 */
+}
+
+.overlay h1 {
+  font-size: 4rem;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  color: #E6F1FF; /* 意识白 */
+  text-shadow: 0 0 10px rgba(230, 241, 255, 0.5), 0 0 20px rgba(100, 255, 218, 0.5); /* 混合白光和赛博青光晕 */
+}
+
+.overlay p {
+  font-size: 1.2rem;
+  margin-top: 1rem;
+  color: #E6F1FF; /* 意识白 */
+  opacity: 0.8;
+  text-shadow: 0 0 5px rgba(230, 241, 255, 0.5);
+} 
