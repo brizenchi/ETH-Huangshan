@@ -165,8 +165,8 @@ function KeyVisual() {
       <Suspense fallback={null}>
         {/* 使用我们自定义的、可旋转的、细节更丰富的星空组件 */}
         <CustomStars />
-        {/* 渲染粒子化人类剪影 */}
-        <Silhouette />
+        {/* 渲染粒子化人类剪影 
+        <Silhouette />*/}
       </Suspense>
 
       {/* 
