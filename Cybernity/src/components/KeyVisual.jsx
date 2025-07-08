@@ -26,6 +26,7 @@ import React, { useRef, useMemo, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 // 从three库中导入BufferGeometry和BufferAttribute，用于手动创建几何体
 import * as THREE from 'three';
+import Silhouette from './Silhouette';
 
 /**
  * @description 自定义星空组件 (v2 - 精修版)
@@ -164,6 +165,8 @@ function KeyVisual() {
       <Suspense fallback={null}>
         {/* 使用我们自定义的、可旋转的、细节更丰富的星空组件 */}
         <CustomStars />
+        {/* 渲染粒子化人类剪影 */}
+        <Silhouette />
       </Suspense>
 
       {/* 

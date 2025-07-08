@@ -54,8 +54,23 @@
   font-size: 4rem;
   font-weight: 400;
   letter-spacing: 0.05em;
-  color: #E6F1FF; /* 意识白 */
+  background: linear-gradient(90deg, #64FFDA, #E6F1FF, #FFD700, #E6F1FF, #64FFDA);
+  background-size: 200% auto;
+  color: #000;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: neon-flow 5s ease-in-out infinite;
   text-shadow: 0 0 10px rgba(230, 241, 255, 0.5), 0 0 20px rgba(100, 255, 218, 0.5); /* 混合白光和赛博青光晕 */
+}
+
+@keyframes neon-flow {
+  0% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: 0% center;
+  }
 }
 
 .overlay p {
