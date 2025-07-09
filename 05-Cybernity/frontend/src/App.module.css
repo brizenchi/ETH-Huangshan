@@ -24,12 +24,68 @@
 */
 
 .appContainer {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #000;
   position: relative;
-  width: 100%;
-  height: 100%;
 }
 
-.overlay {
+.corner {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border: 2px solid rgba(100, 255, 218, 0.2); /* 降低亮度，更微妙 */
+  opacity: 1; /* 始终可见 */
+  z-index: 5; /* 确保在内容之上 */
+}
+.topLeft { top: 2rem; left: 2rem; border-right: none; border-bottom: none; }
+.topRight { top: 2rem; right: 2rem; border-left: none; border-bottom: none; }
+.bottomLeft { bottom: 2rem; left: 2rem; border-right: none; border-top: none; }
+.bottomRight { bottom: 2rem; right: 2rem; border-left: none; border-top: none; }
+
+.gridBackground {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image:
+    linear-gradient(rgba(100, 255, 218, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(100, 255, 218, 0.07) 1px, transparent 1px);
+  background-size: 50px 50px;
+  animation: grid-pan 30s linear infinite;
+  z-index: -1;
+}
+
+@keyframes grid-pan {
+  0% { background-position: 0 0; }
+  100% { background-position: 50px 50px; }
+}
+
+
+.keyVisualContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1; 
+}
+
+/* 新增：固定内容容器 */
+.contentContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 3; /* 在背景和导航之上 */
+  pointer-events: none; /* 让事件穿透到下层滚动容器 */
+}
+
+/* 新增：包裹每一页内容的包装器 */
+.pageWrapper {
   position: absolute;
   top: 0;
   left: 0;
@@ -39,32 +95,163 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  opacity: 0;
+  transition: opacity 0.6s ease-in-out;
+  pointer-events: none; /* 默认不可交互 */
+}
+
+.pageWrapper.active {
+  opacity: 1;
+  /* 移除此行：这曾是导致滚动事件被拦截的元凶 */
+  /* pointer-events: auto; */
+}
+
+.scrollContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+  z-index: 2; /* 在背景之上，在内容之下 */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollContainer::-webkit-scrollbar {
+  display: none;
+}
+
+/* 旧的 .section 现在是 .sectionTrigger */
+.sectionTrigger {
+  height: 100vh;
+  width: 100%;
+  scroll-snap-align: start;
+}
+
+/* --- 移除所有旧的.section动画逻辑 --- */
+/*
+.section { ... }
+.section:not(.active) > * { ... }
+*/
+
+/* --- 更新动画逻辑，使其在 .pageWrapper.active 时触发 --- */
+
+.overlay {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   text-align: center;
-  pointer-events: none; /* 允许鼠标事件穿透浮层 */
+  /* 恢复：让浮层本身不拦截事件 */
+  pointer-events: none;
+  
+  & > * {
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+  }
 }
 
+/* 移除之前冲突的 opacity 设置 */
+/*
 .overlay h1,
-.overlay p {
-  margin: 0;
-  padding: 0;
-  pointer-events: auto; /* 但允许选择或与文本交互 */
+.overlay p,
+.buttonContainer,
+.pageContent h2,
+.pageContent p {
+  opacity: 0;
+}
+*/
+
+/* 新增：为所有动画元素设置默认的隐藏状态，从根源解决闪烁问题 */
+.overlay h1,
+.overlay p,
+.ctaButton, /* 从 .buttonContainer 改为 .ctaButton */
+.pageContent h2,
+.pageContent p {
+  opacity: 0;
 }
 
+
+/* --- 重构并统一所有动画 --- */
+
+/* 入场动画: 蒙版揭示 */
+@keyframes reveal-in {
+  from { clip-path: inset(0 0 100% 0); opacity: 0; }
+  to { clip-path: inset(0 0 0% 0); opacity: 1; }
+}
+
+/* 退场动画: 向上淡出 */
+@keyframes fade-out-up {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-30px); }
+}
+
+/* --- 应用入场动画 (Active State) --- */
+
+.pageWrapper.active h1,
+.pageWrapper.active h2 {
+  animation: reveal-in 0.8s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+/* 修正：大幅增加后续元素的延迟，确保时序清晰 */
+.pageWrapper.active p {
+  animation: reveal-in 0.8s cubic-bezier(0.65, 0, 0.35, 1) 0.5s forwards;
+}
+
+/* 移除对 .buttonContainer 的动画 */
+/*
+.pageWrapper.active .buttonContainer {
+  animation: reveal-in 0.8s cubic-bezier(0.65, 0, 0.35, 1) 0.8s forwards;
+}
+*/
+
+/* 新增：直接对按钮应用动画，并错开延迟 */
+.pageWrapper.active .ctaButton:nth-of-type(1) {
+  animation: reveal-in 0.8s cubic-bezier(0.65, 0, 0.35, 1) 0.8s forwards;
+}
+
+.pageWrapper.active .ctaButton:nth-of-type(2) {
+  animation: reveal-in 0.8s cubic-bezier(0.65, 0, 0.35, 1) 0.95s forwards; /* 增加延迟，错开出现 */
+}
+
+
+/* --- 应用退场动画 (Exiting State) --- */
+
+.pageWrapper.exiting h1,
+.pageWrapper.exiting h2,
+.pageWrapper.exiting p,
+.pageWrapper.exiting .ctaButton { /* 从 .buttonContainer 改为 .ctaButton */
+  animation: fade-out-up 0.5s ease-out forwards;
+}
+
+
+/* --- 保留标题光流效果 --- */
 .overlay h1 {
   font-size: 4rem;
   font-weight: 400;
   letter-spacing: 0.05em;
-  background: linear-gradient(90deg, #64FFDA, #E6F1FF, #FFD700, #E6F1FF, #64FFDA);
-  background-size: 200% auto;
+  background: linear-gradient(
+    110deg,
+    rgba(100, 255, 218, 0.8) 15%,
+    rgba(216, 180, 254, 1) 40%,
+    rgba(230, 241, 255, 0.9) 60%,
+    rgba(100, 255, 218, 0.8) 85%
+  );
+  background-size: 300% auto;
   color: #000;
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: neon-flow 5s ease-in-out infinite;
-  text-shadow: 0 0 10px rgba(230, 241, 255, 0.5), 0 0 20px rgba(100, 255, 218, 0.5); /* 混合白光和赛博青光晕 */
+  animation: aurora-flow 8s ease-in-out infinite alternate;
+  text-shadow: 0 0 10px rgba(230, 241, 255, 0.5), 0 0 20px rgba(100, 255, 218, 0.5);
 }
 
-@keyframes neon-flow {
+@keyframes aurora-flow {
   0% {
     background-position: 200% center;
   }
@@ -74,9 +261,104 @@
 }
 
 .overlay p {
+  font-size: 1.5rem;
+  margin-top: 1.5rem;
+  color: #E6F1FF;
+  font-weight: 300;
+  letter-spacing: 0.05em;
+  text-shadow: 0 0 8px rgba(230, 241, 255, 0.6);
+}
+
+.buttonContainer {
+  pointer-events: auto; /* 关键修复：让按钮容器可以捕获鼠标事件 */
+  position: relative;
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 2rem;
+  z-index: 10;
+}
+
+.ctaButton {
+  position: relative; /* 为光泽效果提供定位上下文 */
+  overflow: hidden; /* 隐藏溢出的光泽 */
+  background-color: rgba(100, 255, 218, 0.1);
+  border: 1px solid rgba(100, 255, 218, 0.5);
+  color: #E6F1FF;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  text-shadow: 0 0 5px rgba(100, 255, 218, 0.5);
+}
+
+.ctaButton:hover::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    to right,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,0.3) 50%,
+    rgba(255,255,255,0) 100%
+  );
+  transform: rotate(20deg);
+  animation: shimmer 1s ease-out;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%) rotate(20deg); }
+  100% { transform: translateX(100%) rotate(20deg); }
+}
+
+.ctaButton:hover {
+  background-color: rgba(100, 255, 218, 0.2);
+  border-color: #64FFDA;
+  transform: translateY(-2px);
+  box-shadow: 0 0 15px rgba(100, 255, 218, 0.4);
+}
+
+.secondaryButton {
+  background-color: transparent;
+  border-color: rgba(230, 241, 255, 0.4);
+  text-shadow: none;
+}
+
+.secondaryButton:hover {
+  background-color: rgba(230, 241, 255, 0.1);
+  border-color: #E6F1FF;
+  box-shadow: 0 0 15px rgba(230, 241, 255, 0.3);
+}
+
+.pageContent {
+  color: white;
+  text-align: center;
+  max-width: 600px;
+  padding: 3rem; /* 增加内边距给网格留出空间 */
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+  pointer-events: auto;
+  position: relative; /* 为网格背景的z-index提供上下文 */
+  z-index: 1;
+}
+
+.pageContent h2 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  background: linear-gradient(110deg, #E6F1FF, #D8B4FE);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.pageContent p {
   font-size: 1.2rem;
-  margin-top: 1rem;
-  color: #E6F1FF; /* 意识白 */
-  opacity: 0.8;
-  text-shadow: 0 0 5px rgba(230, 241, 255, 0.5);
+  color: #E6F1FF;
+  /* 移除与动画冲突的 opacity */
+  /* opacity: 1; */
 } 

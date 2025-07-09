@@ -1,0 +1,72 @@
+.dotNav {
+  position: fixed;
+  top: 50%;
+  right: 2rem;
+  transform: translateY(-50%);
+  z-index: 10;
+  height: calc(4 * 12px + 3 * 1.5rem); 
+  width: 12px; /* 新增：给导航器一个明确的宽度 */
+}
+
+/* 视觉轨道 */
+.track {
+  position: absolute;
+  top: calc(12px / 2); /* 从第一个点中心开始 */
+  left: 50%;
+  width: 2px;
+  height: calc(100% - 12px); /* 轨道长度正好连接首尾两点中心 */
+  transform: translateX(-50%);
+  background-color: rgba(100, 255, 218, 0.1);
+}
+
+/* 轨道上的静态节点 */
+.clickableArea::before,
+.clickableArea::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: rgba(100, 255, 218, 0.2);
+    z-index: 1;
+}
+.clickableArea::before {
+    top: 3px; /* 调整位置使其居中对齐 */
+}
+.clickableArea::after {
+    bottom: 3px; /* 调整位置使其居中对齐 */
+}
+
+/* 移动的能量核心 */
+.indicator {
+  position: absolute;
+  top: 0;
+  left: 50%; /* 相对于.dotNav进行居中 */
+  width: 12px;
+  height: 12px;
+  background-color: #64FFDA;
+  border-radius: 50%;
+  box-shadow: 0 0 12px #64FFDA, 0 0 20px #64FFDA;
+  /* 移除静态 transform，完全由JS控制 */
+  transition: transform 0.5s cubic-bezier(0.65, 0, 0.35, 1);
+  z-index: 2;
+}
+
+/* 隐形的点击区域 */
+.clickableArea {
+  position: relative;
+  z-index: 3;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.clickableArea li {
+  flex: 1;
+  cursor: pointer;
+} 

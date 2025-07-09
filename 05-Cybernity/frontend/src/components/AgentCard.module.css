@@ -1,0 +1,120 @@
+/* ======================================= */
+/*          1. 卡片总容器样式             */
+/* ======================================= */
+.card {
+  display: flex;
+  flex-direction: column;
+  background: rgba(10, 25, 47, 0.5);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  position: relative;
+  overflow: hidden; /* 必须保留，用于裁切辉光和圆角 */
+}
+
+.card:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 0 25px rgba(0, 255, 255, 0.4);
+  border-color: rgba(0, 255, 255, 0.5);
+}
+
+.card:hover::before {
+  opacity: 1;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 50% 0, rgba(0, 255, 255, 0.2), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+/* ======================================= */
+/*          2. 信息区域 (上部)             */
+/* ======================================= */
+.mainContent {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  flex-grow: 1; /* 关键：让信息区占据所有剩余空间 */
+  min-height: 0; /* 关键：防止子元素溢出时破坏flex布局 */
+}
+
+.avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, rgba(0, 255, 255, 0.2), rgba(173, 216, 230, 0.2));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+  flex-shrink: 0; /* 防止头像被压缩 */
+}
+
+.textWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* 在姓名和简介之间添加间距 */
+  flex-grow: 1;
+  min-width: 0; /* 关键：让内部的文本溢出省略生效 */
+}
+
+.name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0; /* 移除所有默认外边距 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bio {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.4;
+  margin: 0; /* 移除所有默认外边距 */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ======================================= */
+/*          3. 按钮区域 (底部)             */
+/* ======================================= */
+.consultFooter {
+  height: 40px; /* 关键：固定高度 */
+  flex-shrink: 0; /* 关键：禁止此区域收缩 */
+  display: flex;
+  align-items: center; /* 关键：垂直居中 */
+  justify-content: center; /* 关键：水平居中 */
+
+  background-color: rgba(0, 122, 133, 0.4);
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-top: 1px solid rgba(0, 255, 255, 0.2);
+}
+
+.consultFooter:hover {
+  background-color: rgba(0, 188, 204, 0.5);
+  color: #fff;
+  box-shadow: 0 0 20px rgba(0, 225, 255, 0.4);
+} 

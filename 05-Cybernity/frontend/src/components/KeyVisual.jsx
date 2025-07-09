@@ -130,70 +130,113 @@ function CustomStars() {
     geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
     geo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
     
-    // --- v4 新增：创建星座连线 ---
+    // --- v9: 最终平衡版星座算法 ---
     const linePoints = [];
-    // 连接距离：决定了星星之间多远可以形成连线
-    const connectionDistance = 8;
-    // 每个星星的最大连接数，防止出现过于密集的"蜘蛛网"
-    const maxConnectionsPerNode = 2;
-    // 节点概率：只有一部分星星（5%）会成为星座的"节点"去寻找连接
-    const nodeProbability = 0.05;
+    const connectionDistance = 10;
+    const maxConnectionsPerNode = 3;
+    const initialNodeProbability = 0.07; // 提升初始节点概率以增加密度
+    const propagationProbability = 0.30; // 略微提升传播几率以帮助星座成长
+    const minAngle = Math.PI / 6; 
+    const minConstellationSize = 5;
 
-    // 为了高效查找，我们创建一个包含3D向量和连接数状态的对象数组
     const points3D = [];
     for (let i = 0; i < count; i++) {
         points3D.push({
+            id: i,
             vec: new THREE.Vector3(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]),
             connections: 0,
+            isNode: false,
+            connectionVectors: [],
         });
     }
-
-    // 性能优化：按x坐标排序，这样我们只需要在邻近的子集里搜索，而不是全局搜索
     points3D.sort((a, b) => a.vec.x - b.vec.x);
 
+    points3D.forEach(p => {
+        if (Math.random() < initialNodeProbability) p.isNode = true;
+    });
+
+    // 步骤1: 找出所有可能的有效连接
+    const validConnections = [];
     for (let i = 0; i < count; i++) {
-        // 如果这个点不被选为节点，或者已经达到最大连接数，则跳过
-        if (Math.random() > nodeProbability || points3D[i].connections >= maxConnectionsPerNode) {
-            continue;
-        }
+        const pointA = points3D[i];
+        if (!pointA.isNode || pointA.connections >= maxConnectionsPerNode) continue;
 
-        // 从当前点开始，向右（x更大的方向）搜索邻居
         for (let j = i + 1; j < count; j++) {
-            const pointA = points3D[i];
             const pointB = points3D[j];
+            if (pointB.vec.x - pointA.vec.x > connectionDistance) break;
+            if (pointB.connections >= maxConnectionsPerNode) continue;
+            
+            const dist = pointA.vec.distanceTo(pointB.vec);
+            if (dist < connectionDistance) {
+                const newVecA = new THREE.Vector3().subVectors(pointB.vec, pointA.vec).normalize();
+                let angleOk = true;
+                for (const existingVec of pointA.connectionVectors) if (existingVec.angleTo(newVecA) < minAngle) { angleOk = false; break; }
+                if (!angleOk) continue;
 
-            // 性能优化：如果x轴的距离已经超过了总连接距离，后续的点只会更远，可以提前终止
-            if (pointB.vec.x - pointA.vec.x > connectionDistance) {
-                break;
+                const newVecB = newVecA.clone().negate();
+                for (const existingVec of pointB.connectionVectors) if (existingVec.angleTo(newVecB) < minAngle) { angleOk = false; break; }
+                if (!angleOk) continue;
+
+                validConnections.push([pointA, pointB]);
+                
+                pointA.connections++; pointB.connections++;
+                pointA.connectionVectors.push(newVecA); pointB.connectionVectors.push(newVecB);
+                if (!pointB.isNode && Math.random() < propagationProbability) pointB.isNode = true;
+                if (pointA.connections >= maxConnectionsPerNode) break;
             }
+        }
+    }
 
-            // 如果潜在的邻居点也已经满载，则跳过
-            if (pointB.connections >= maxConnectionsPerNode) {
-                continue;
+    // 步骤2: 构建邻接表并筛选星座
+    const adj = new Map();
+    points3D.forEach(p => adj.set(p.id, []));
+    validConnections.forEach(([pA, pB]) => {
+        adj.get(pA.id).push(pB.id);
+        adj.get(pB.id).push(pA.id);
+    });
+
+    const finalLinePoints = [];
+    const visited = new Set();
+    const pointMap = new Map(points3D.map(p => [p.id, p]));
+
+    for (const p of points3D) {
+        if (!visited.has(p.id)) {
+            const componentNodeIds = [];
+            const q = [p.id];
+            visited.add(p.id);
+
+            // 步骤3: 识别一个完整的星座（连通分量）
+            while (q.length > 0) {
+                const currentId = q.shift();
+                componentNodeIds.push(currentId);
+                const neighbors = adj.get(currentId) || [];
+                for (const neighborId of neighbors) {
+                    if (!visited.has(neighborId)) {
+                        visited.add(neighborId);
+                        q.push(neighborId);
+                    }
+                }
             }
             
-            // 计算两点之间的实际三维距离
-            const dist = pointA.vec.distanceTo(pointB.vec);
-
-            if (dist < connectionDistance) {
-                // 如果距离合适，创建一条连线
-                linePoints.push(pointA.vec.x, pointA.vec.y, pointA.vec.z);
-                linePoints.push(pointB.vec.x, pointB.vec.y, pointB.vec.z);
-
-                // 更新两点的连接计数
-                pointA.connections++;
-                pointB.connections++;
-
-                // 如果当前节点已达到最大连接数，停止为它寻找新的连接
-                if (pointA.connections >= maxConnectionsPerNode) {
-                    break;
+            // 步骤4: 如果星座规模够大，则将其连线加入最终渲染列表
+            if (componentNodeIds.length >= minConstellationSize) {
+                for (const nodeId of componentNodeIds) {
+                    const neighbors = adj.get(nodeId) || [];
+                    for (const neighborId of neighbors) {
+                        if (nodeId < neighborId) { // 避免重复添加
+                            const node = pointMap.get(nodeId);
+                            const neighbor = pointMap.get(neighborId);
+                            finalLinePoints.push(node.vec.x, node.vec.y, node.vec.z);
+                            finalLinePoints.push(neighbor.vec.x, neighbor.vec.y, neighbor.vec.z);
+                        }
+                    }
                 }
             }
         }
     }
 
     const lineGeo = new THREE.BufferGeometry();
-    lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(linePoints, 3));
+    lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(finalLinePoints, 3));
     
     return [geo, lineGeo, tex];
   }, []);
