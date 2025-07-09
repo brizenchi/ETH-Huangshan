@@ -1,0 +1,9 @@
+.idea
+logs
+.env
+deployment/*
+!deployment/dockerfile
+.DS_Store
+.vscode
+__debug*
+cybernity
