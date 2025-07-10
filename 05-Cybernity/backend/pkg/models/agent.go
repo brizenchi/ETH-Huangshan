@@ -19,6 +19,12 @@ type Agents struct {
 func (Agents) TableName() string {
 	return "agents"
 }
+
+const (
+	OnChain  = 1
+	OffChain = 0
+)
+
 func (a *Agents) Create(ctx context.Context) (err error) {
 	// Check if CID already exists
 	var count int64
@@ -34,11 +40,14 @@ func (a *Agents) Create(ctx context.Context) (err error) {
 }
 func (a *Agents) List(ctx context.Context) ([]*Agents, error) {
 	var agents []*Agents
-	err := pg.GetManager().GetClient("cybernity").GetDB(ctx).Find(&agents).Error
+	err := pg.GetManager().GetClient("cybernity").GetDB(ctx).Where("on_chain = ?", OnChain).Order("created_at desc").Find(&agents).Error
 	return agents, err
 }
 func (a *Agents) Get(ctx context.Context, cid string) (*Agents, error) {
 	var agent Agents
 	err := pg.GetManager().GetClient("cybernity").GetDB(ctx).Where("cid = ?", cid).First(&agent).Error
 	return &agent, err
+}
+func (a *Agents) OnChain(ctx context.Context, cid string) error {
+	return pg.GetManager().GetClient("cybernity").GetDB(ctx).Model(&Agents{}).Where("cid = ?", cid).Update("on_chain", OnChain).Error
 }

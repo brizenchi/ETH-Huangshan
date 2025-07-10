@@ -62,3 +62,7 @@ func (s *agentService) ListAgent(ctx context.Context) ([]*models.Agents, error) 
 func (s *agentService) GetAgent(ctx context.Context, cid string) (*models.Agents, error) {
 	return (&models.Agents{}).Get(ctx, cid)
 }
+
+func (s *agentService) UpdateOnChain(ctx context.Context, cid string) error {
+	return (&models.Agents{}).OnChain(ctx, cid)
+}

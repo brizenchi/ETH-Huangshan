@@ -124,7 +124,7 @@ func EventListener(ctx context.Context, ethConfig eth.Config) {
 					continue
 				}
 				fmt.Printf("Answer: %s\n", answer)
-				answerCID, err := ipfsService.UploadFile(ctx, []byte(answer))
+				answerCID, err := ipfsService.UploadFileRaw(ctx, []byte(answer), agent.CID+"_answer.txt")
 				if err != nil {
 					log.Printf("Failed to upload file to IPFS: %v", err)
 					continue

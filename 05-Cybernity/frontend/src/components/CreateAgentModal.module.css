@@ -1,0 +1,151 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.modal {
+  background: #1a1a1d;
+  border: 1px solid #4e4e50;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  padding: 2rem;
+  color: #c5c6c7;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #4e4e50;
+  padding-bottom: 1rem;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #66fcf1;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #c5c6c7;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.formGroup label {
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #a5a6a7;
+}
+
+.formGroup input,
+.formGroup textarea {
+  background: #0b0c10;
+  border: 1px solid #4e4e50;
+  border-radius: 4px;
+  padding: 0.75rem;
+  color: #c5c6c7;
+  font-size: 1rem;
+}
+
+.formGroup input:disabled {
+  background: #2a2a2d;
+  cursor: not-allowed;
+}
+
+.formGroup input[type="file"] {
+  padding: 0.5rem;
+}
+
+.error {
+  color: #ff6b6b;
+  text-align: center;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.actions button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+}
+
+.cancelButton {
+  background-color: transparent;
+  border: 1px solid #4e4e50;
+  color: #c5c6c7;
+}
+
+.cancelButton:hover {
+  background-color: #4e4e50;
+}
+
+.submitButton {
+  background-color: #66fcf1;
+  color: #0b0c10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.submitButton:hover {
+  filter: brightness(1.2);
+}
+
+.submitButton:disabled {
+  background-color: #45a29e;
+  cursor: not-allowed;
+}
+
+.spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid rgba(11, 12, 16, 0.3);
+  border-top-color: #0b0c10;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+} 

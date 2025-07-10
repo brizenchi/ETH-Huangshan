@@ -2,16 +2,20 @@
 /*          1. 卡片总容器样式             */
 /* ======================================= */
 .card {
+  width: 320px;
+  height: 220px;
+  box-sizing: border-box;
+  background: rgba(25, 28, 36, 0.6);
+  border: 1px solid rgba(100, 255, 218, 0.2);
+  border-radius: 8px;
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  background: rgba(10, 25, 47, 0.5);
-  border: 1px solid rgba(0, 255, 255, 0.2);
-  border-radius: 8px;
+  justify-content: space-between;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-  position: relative;
-  overflow: hidden; /* 必须保留，用于裁切辉光和圆角 */
+  transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 .card:hover {
@@ -44,9 +48,7 @@
   display: flex;
   align-items: flex-start;
   gap: 1.5rem;
-  padding: 1.5rem;
-  flex-grow: 1; /* 关键：让信息区占据所有剩余空间 */
-  min-height: 0; /* 关键：防止子元素溢出时破坏flex布局 */
+  overflow: hidden; /* Prevent content from spilling out */
 }
 
 .avatar {
@@ -84,14 +86,15 @@
 
 .bio {
   font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.7);
-  line-height: 1.4;
-  margin: 0; /* 移除所有默认外边距 */
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
+  color: #a9b7d1;
+  line-height: 1.5;
+  margin: 0;
+  /* Truncate text after 3 lines */
   overflow: hidden;
   text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
 }
 
 /* ======================================= */

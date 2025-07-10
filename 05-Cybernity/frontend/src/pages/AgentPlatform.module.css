@@ -20,14 +20,27 @@
 }
 
 .agentList {
-  flex-grow: 1;
+  flex-grow: 1; /* Allow the list to take up available space */
+  overflow-y: auto; /* Enable vertical scrolling */
+  padding-top: 2rem; /* Add space below the header */
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, 320px);
   gap: 2rem;
-  padding: 2rem; /* 从 2rem 0 改为 2rem，增加水平缓冲区 */
-  overflow-y: auto;
-  
-  /* 为了更平滑的滚动体验 */
-  -webkit-overflow-scrolling: touch;
-  scroll-behavior: smooth;
+  justify-content: center;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-bottom: 4rem;
+} 
+
+.message,
+.error {
+  color: #c5c6c7;
+  font-size: 1.2rem;
+  text-align: center;
+  width: 100%;
+}
+
+.error {
+  color: #ff6b6b;
 } 

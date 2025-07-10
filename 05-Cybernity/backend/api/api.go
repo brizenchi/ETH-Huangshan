@@ -41,6 +41,8 @@ func Load(e *gin.Engine, mw ...gin.HandlerFunc) *gin.Engine {
 		{
 			agentRouter.POST("/generate", agent.Generate)
 			agentRouter.GET("/list", agent.List)
+			agentRouter.GET("/detail", agent.Detail)
+			agentRouter.PUT("/on_chain", agent.OnChain)
 		}
 
 	}

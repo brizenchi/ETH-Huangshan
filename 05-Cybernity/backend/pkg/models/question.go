@@ -35,8 +35,14 @@ func (q *Questions) List(ctx context.Context) ([]*Questions, error) {
 	return questions, err
 }
 
-func (q *Questions) Get(ctx context.Context, questionId int) (*Questions, error) {
+func (q *Questions) GetByQuestionID(ctx context.Context, questionId int) (*Questions, error) {
 	var question Questions
 	err := pg.GetManager().GetClient("cybernity").GetDB(ctx).Where("question_id = ?", questionId).First(&question).Error
 	return &question, err
+}
+
+func (q *Questions) GetByCid(ctx context.Context, cid string) ([]*Questions, error) {
+	var questions []*Questions
+	err := pg.GetManager().GetClient("cybernity").GetDB(ctx).Where("cid = ?", cid).Order("created_at desc").Find(&questions).Error
+	return questions, err
 }

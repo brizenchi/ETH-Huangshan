@@ -139,6 +139,7 @@ type AgentResponse struct {
 	Description    string `json:"description"`
 	CID            string `json:"cid"`
 	CreatorAddress string `json:"creator_address"`
+	AgentAddress   string `json:"agent_address"`
 }
 
 func List(c *gin.Context) {
@@ -155,7 +156,67 @@ func List(c *gin.Context) {
 			Description:    agent.Description,
 			CID:            agent.CID,
 			CreatorAddress: agent.CreatorAddress,
+			AgentAddress:   agent.AgentAddress,
 		}
 	}
 	result.Success(c, agentResponses)
+}
+func OnChain(c *gin.Context) {
+	cid := c.Query("cid")
+	err := services.AgentService.UpdateOnChain(c.Request.Context(), cid)
+	if err != nil {
+		result.UError(c, err.Error())
+		return
+	}
+	result.Success(c, nil)
+}
+
+type DetailResponse struct {
+	ID             uint               `json:"id"`
+	Name           string             `json:"name"`
+	Description    string             `json:"description"`
+	CID            string             `json:"cid"`
+	CreatorAddress string             `json:"creator_address"`
+	AgentAddress   string             `json:"agent_address"`
+	Questions      []QuestionResponse `json:"questions"`
+}
+type QuestionResponse struct {
+	ID              uint   `json:"id"`
+	Question        string `json:"question"`
+	Answer          string `json:"answer"`
+	AnswerCID       string `json:"answer_cid"`
+	TransactionHash string `json:"transaction_hash"`
+}
+
+func Detail(c *gin.Context) {
+	cid := c.Query("cid")
+	agent, err := services.AgentService.GetAgent(c.Request.Context(), cid)
+	if err != nil {
+		result.UError(c, err.Error())
+		return
+	}
+	questions, err := services.QuestionService.GetQuestionByCid(c.Request.Context(), cid)
+	if err != nil {
+		result.UError(c, err.Error())
+		return
+	}
+	questionResponses := make([]QuestionResponse, len(questions))
+	for i, question := range questions {
+		questionResponses[i] = QuestionResponse{
+			ID:              question.ID,
+			Question:        question.Question,
+			Answer:          question.Answer,
+			AnswerCID:       question.AnswerCID,
+			TransactionHash: question.TransactionHash,
+		}
+	}
+	result.Success(c, DetailResponse{
+		ID:             agent.ID,
+		Name:           agent.Name,
+		Description:    agent.Description,
+		CID:            agent.CID,
+		CreatorAddress: agent.CreatorAddress,
+		AgentAddress:   agent.AgentAddress,
+		Questions:      questionResponses,
+	})
 }

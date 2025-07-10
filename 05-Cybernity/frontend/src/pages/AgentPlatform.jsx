@@ -1,32 +1,78 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import styles from './AgentPlatform.module.css';
 import AppHeader from '../components/AppHeader';
 import AgentCard from '../components/AgentCard';
-
-// 模拟数据
-const mockAgents = [
-  { name: 'Albert Einstein', bio: 'Physicist who developed the theory of relativity.', avatar: 'AE' },
-  { name: 'Leonardo da Vinci', bio: 'High Renaissance artist, scientist, and inventor.', avatar: 'LV' },
-  { name: 'Cleopatra', bio: 'The last active ruler of the Ptolemaic Kingdom of Egypt.', avatar: 'C' },
-  { name: 'William Shakespeare', bio: 'England\'s national poet, the "Bard of Avon".', avatar: 'WS' },
-  { name: 'Marie Curie', bio: 'Physicist and chemist who conducted pioneering research on radioactivity.', avatar: 'MC' },
-  { name: 'Nikola Tesla', bio: 'Inventor, electrical engineer, and futurist.', avatar: 'NT' },
-  { name: 'Sun Tzu', bio: 'Chinese general, strategist, and philosopher.', avatar: 'ST' },
-  { name: 'Isaac Newton', bio: 'Mathematician, physicist, astronomer, and author.', avatar: 'IN' },
-  { name: 'Joan of Arc', bio: 'Patron saint of France, honored as a defender of the French nation.', avatar: 'JA' },
-];
+import CreateAgentModal from '../components/CreateAgentModal';
 
 const AgentPlatform = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [agents, setAgents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchAgents = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/v1/agent/list'); // Use relative path
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const result = await response.json();
+        console.log(result);
+        if (result.code === 200 && Array.isArray(result.data)) {
+          const formattedAgents = result.data.map(agent => ({
+            id: agent.id,
+            cid: agent.cid, // <-- Add this
+            name: agent.name,
+            bio: agent.description,
+            avatar: agent.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase(),
+          }));
+          setAgents(formattedAgents);
+        } else {
+          throw new Error(result.message || 'Failed to fetch agent list.');
+        }
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAgents();
+  }, []);
+
+  const handleOpenModal = () => setIsModalOpen(true);
+  const handleCloseModal = useCallback(() => setIsModalOpen(false), []);
+
+  const handleAgentCreated = useCallback((newAgentData) => {
+    const newAgent = {
+      id: newAgentData.id || Date.now(), // Fallback ID
+      name: newAgentData.name,
+      bio: newAgentData.description,
+      avatar: newAgentData.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase(),
+    };
+    setAgents(prevAgents => [newAgent, ...prevAgents]);
+    handleCloseModal();
+  }, [handleCloseModal]);
+
   return (
     <div className={styles.container}>
-      <AppHeader />
+      <AppHeader onNewAgentClick={handleOpenModal} />
       <main className={styles.agentList}>
-        {mockAgents.map(agent => (
-          <AgentCard key={agent.name} agent={agent} />
+        {loading && <p className={styles.message}>Loading agents...</p>}
+        {error && <p className={styles.error}>Error: {error}</p>}
+        {!loading && !error && agents.map(agent => (
+          <AgentCard key={agent.id} agent={agent} />
         ))}
       </main>
+      <CreateAgentModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onAgentCreated={handleAgentCreated}
+      />
     </div>
   );
 };
 
-export default AgentPlatform; 
+export default AgentPlatform;
