@@ -48,6 +48,7 @@ const AgentPlatform = () => {
   const handleAgentCreated = useCallback((newAgentData) => {
     const newAgent = {
       id: newAgentData.id || Date.now(), // Fallback ID
+      cid: newAgentData.cid, // <-- Add this
       name: newAgentData.name,
       bio: newAgentData.description,
       avatar: newAgentData.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase(),

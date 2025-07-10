@@ -27,6 +27,7 @@ const ChatPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const pollingRef = useRef(null); // Ref for the polling interval
+  const submittedQuestionRef = useRef(''); // Ref to store the submitted question
 
   const { data: hash, writeContract, isPending, error: contractError } = useWriteContract();
 
@@ -67,6 +68,8 @@ const ChatPage = () => {
       return;
     }
     
+    submittedQuestionRef.current = newQuestion; // Store the question in the ref
+
     writeContract({
       address: contractAddress,
       abi: contractAbi,
@@ -96,10 +99,10 @@ const ChatPage = () => {
       toast.success('Transaction confirmed! Polling for backend update...', { id: 'ask' });
       setNewQuestion('');
 
-      const expectedQuestion = newQuestion;
+      const expectedQuestion = submittedQuestionRef.current;
       const pollStartTime = Date.now();
       const POLLING_INTERVAL = 2000; // 2 seconds
-      const POLLING_TIMEOUT = 30000; // 30 seconds
+      const POLLING_TIMEOUT = 60000; // 60 seconds
 
       pollingRef.current = setInterval(async () => {
         try {
@@ -138,7 +141,7 @@ const ChatPage = () => {
         clearInterval(pollingRef.current);
       }
     };
-  }, [isPending, isConfirming, isConfirmed, contractError, cid, newQuestion]);
+  }, [isPending, isConfirming, isConfirmed, contractError, cid]);
 
   if (loading) return <div className={styles.container}><p>Loading agent...</p></div>;
   if (error) return <div className={styles.container}><p>Error: {error}</p></div>;

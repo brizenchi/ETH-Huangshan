@@ -65,7 +65,7 @@ const CreateAgentModal = ({ isOpen, onClose, onAgentCreated }) => {
     
     setIsSubmitting(true);
     setError(null);
-    const toastId = toast.loading('Step 1/3: Uploading to IPFS...');
+    toastIdRef.current = toast.loading('Step 1/3: Uploading to IPFS...');
 
     const formData = new FormData();
     formData.append('name', name);
