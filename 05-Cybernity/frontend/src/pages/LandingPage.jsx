@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './LandingPage.module.css';
 import DotNav from '../components/DotNav';
+import RiverOfThought from '../components/RiverOfThought'; // 导入新组件
+import CrystalOfTrust from '../components/CrystalOfTrust'; // 1. 导入新组件
 
 // 对文案进行“诗化”重构，增加大量有意义的换行
 const sectionsContent = [
@@ -141,7 +143,7 @@ function LandingPage() {
                 </p>
                 <div className={styles.buttonContainer}>
                   <button className={styles.ctaButton} onClick={handleLaunchApp}>
-                    进入画廊
+                    启动App
                   </button>
                   <button className={`${styles.ctaButton} ${styles.secondaryButton}`}>
                     加入社区
@@ -151,24 +153,48 @@ function LandingPage() {
             ) : (
               <div className={`${styles.pageContent} ${styles[content.layout] || ''}`}>
                 <div className={styles.gridBackground}></div>
-                <h2>
-                  {content.title.split('\n').map((line, i) => (
-                    <React.Fragment key={i}>
-                      {line}
-                      {i < content.title.split('\n').length - 1 && <br />}
-                    </React.Fragment>
-                  ))}
-                </h2>
-                <p>
-                  {content.subtitle.split('\n').map((line, i) => {
-                    const isHighlighted = content.highlightedLines?.includes(i);
-                    return (
-                      <span key={i} className={`${styles.line} ${isHighlighted ? styles.highlightedText : ''}`} style={{ animationDelay: `${0.2 + i * 0.1}s` }}>
-                        {line || <span>&nbsp;</span>}
-                      </span>
-                    );
-                  })}
-                </p>
+                {/* 在第二页 (index === 1) 插入 SVG 组件 */}
+                {index === 1 && (
+                  <div className={styles.illustrationContainer}>
+                    <RiverOfThought />
+                  </div>
+                )}
+                {/* 2. 在第三页 (index === 2) 插入新的 SVG 组件 */}
+                {index === 2 && (
+                  <div className={`${styles.illustrationContainer} ${styles.illustrationLeft}`}>
+                    <CrystalOfTrust />
+                  </div>
+                )}
+                <div className={styles.textBlock}>
+                  <h2>
+                    {content.title.split('\n').map((line, i) => (
+                      <React.Fragment key={i}>
+                        {line}
+                        {i < content.title.split('\n').length - 1 && <br />}
+                      </React.Fragment>
+                    ))}
+                  </h2>
+                  <p>
+                    {content.subtitle.split('\n').map((line, i) => {
+                      const isHighlighted = content.highlightedLines?.includes(i);
+                      return (
+                        <span key={i} className={`${styles.line} ${isHighlighted ? styles.highlightedText : ''}`} style={{ animationDelay: `${0.2 + i * 0.1}s` }}>
+                          {line || <span>&nbsp;</span>}
+                        </span>
+                      );
+                    })}
+                  </p>
+                </div>
+                {content.layout === 'layoutCenterFinal' && (
+                  <div className={styles.buttonContainer} style={{ marginTop: '3rem' }}>
+                    <button className={styles.ctaButton} onClick={handleLaunchApp}>
+                      启动App
+                    </button>
+                    <button className={`${styles.ctaButton} ${styles.secondaryButton}`}>
+                      加入社区
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>

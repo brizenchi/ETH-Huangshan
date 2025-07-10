@@ -173,8 +173,10 @@
   padding-left: 1rem;
   flex-grow: 1;
   overflow-y: auto; 
-  display: flex;
-  flex-direction: column;
+  /* --- SWITCHING TO CSS GRID --- */
+  display: grid;
+  grid-template-columns: 1fr; /* Single column taking full width */
+  align-content: flex-start; /* Pack content at the top */
   gap: 1.2rem; /* Increased spacing between bubbles */
   scrollbar-width: thin;
   scrollbar-color: rgba(100, 255, 218, 0.3) transparent;
@@ -210,16 +212,17 @@
 .bubble {
   padding: 0.8rem 1.2rem;
   border-radius: 16px;
-  max-width: 80%;
+  max-width: 80%; /* Re-add for grid layout to prevent full-width bubbles */
   line-height: 1.6;
   backdrop-filter: blur(10px); /* 磨砂玻璃效果 */
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1); /* 微妙的边框 */
+  /* flex-shrink is no longer needed in Grid layout */
 }
 
 /* 用户气泡 (右对齐) */
 .userBubble {
-  align-self: flex-end;
+  justify-self: end; /* Use grid alignment property */
   background-color: rgba(100, 255, 218, 0.15); /* 青色调，半透明 */
   color: #e6f1ff;
   border-radius: 16px 16px 4px 16px; /* 调整圆角以形成箭头感 */
@@ -227,7 +230,7 @@
 
 /* AI 气泡 (左对齐) */
 .aiBubble {
-  align-self: flex-start;
+  justify-self: start; /* Use grid alignment property */
   background-color: rgba(49, 50, 68, 0.4); /* 灰色调，半透明 */
   color: #cdd6f4;
   border-radius: 16px 16px 16px 4px;

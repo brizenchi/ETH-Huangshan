@@ -130,8 +130,8 @@
 }
 
 .overlay h1 {
-  font-size: 4rem;
-  font-weight: 400;
+  font-size: 5rem; /* 放大标题 */
+  font-weight: 700; /* 加粗 */
   letter-spacing: 0.05em;
   background: linear-gradient(
     110deg,
@@ -161,7 +161,7 @@
   font-size: 1.25rem;
   font-weight: 300;
   letter-spacing: 0.05em;
-  color: rgba(230, 241, 255, 0.85);
+  color: rgba(230, 241, 255, 0.8);
   text-shadow: 0 0 15px rgba(100, 255, 218, 0.5);
   margin-top: 1rem;
 }
@@ -169,14 +169,16 @@
 .buttonContainer {
   margin-top: 2rem;
   display: flex;
-  gap: 1rem;
+  justify-content: center; /* 确保按钮在容器内始终居中 */
+  gap: 1.5rem;
   pointer-events: auto;
 }
 
 .ctaButton {
-  font-size: 1rem;
+  padding: 1rem 2.2rem; /* 增加内边距以放大按钮 */
+  font-size: 1.1rem; /* 放大字体 */
   font-weight: 500;
-  color: #fff;
+  color: #ccd6f6;
   background: rgba(100, 255, 218, 0.1);
   border: 1px solid rgba(100, 255, 218, 0.5);
   padding: 0.75rem 1.5rem;
@@ -228,7 +230,7 @@
 .pageContent {
   position: relative;
   width: 100%;
-  max-width: 800px;
+  max-width: 1200px; /* 再次扩大舞台，提供充足空间 */
   padding: 2rem;
   text-align: center;
   color: #fff;
@@ -247,11 +249,45 @@
 .pageContent p {
   max-width: 800px;
   line-height: 2; /* 增大行高，让分行文字有呼吸感 */
-  font-size: 1.1rem;
+  font-family: 'Alibaba PuHuiTi 2.0', 'Georgia', 'SimSun', sans-serif;
   color: #a6adc8;
   display: flex;
   flex-direction: column; /* 让span像block元素一样换行 */
 }
+
+/* --- New Styles for Illustration --- */
+.illustrationContainer {
+  position: absolute;
+  top: 60%;
+  right: -4rem; /* 使用负值将其推向右侧，确保与文本不重叠 */
+  transform: translateY(-50%);
+  width: 60%; /* 占据一半空间 */
+  height: 100%; /* 占满高度 */
+  max-width: 1000px;
+  pointer-events: none;
+  opacity: 0; /* Start hidden for animation */
+  z-index: 0; /* Behind text content */
+}
+
+/* 新增：左侧插画的定位 */
+.illustrationLeft {
+  left: -1rem;
+  top: 50%;
+  right: auto;
+}
+
+/* Apply animation when its page is active */
+.pageWrapper.active .illustrationContainer {
+  animation: reveal-in 0.8s cubic-bezier(0.65, 0, 0.35, 1) 0.8s forwards; /* Appear after text */
+}
+
+/* Make sure the text content is on top */
+.pageContent h2,
+.pageContent p {
+  position: relative;
+  z-index: 1;
+}
+/* --- End New Styles --- */
 
 /* 新增：逐行动画的样式和动画定义 */
 @keyframes fadeInUp {
@@ -275,45 +311,40 @@
 
 /* 布局1: 左对齐 */
 .layoutLeftAligned {
-  align-items: flex-start;
+  align-items: flex-start; /* Changed from center */
   text-align: left;
-  max-width: 900px;
-  margin: 0 auto 0 15%; /* 从左侧推开，留出呼吸空间 */
+  justify-content: flex-start; /* Align content to the left */
+}
+
+.layoutLeftAligned .textBlock {
+  align-self: flex-start;
+  margin-left: 6rem;
+  max-width: 50%; /* 为标题提供更充足的空间 */
 }
 
 /* 布局2: 左右分割，标题在右 */
 .layoutSplitRightTitle {
-  flex-direction: row;
+  display: flex; /* Make it a flex container */
+  justify-content: flex-end; /* Push flex items (the textBlock) to the right */
   align-items: center;
-  justify-content: space-between;
-  max-width: 1100px;
-  gap: 4rem;
+  max-width: 1200px;
+  width: 100%;
 }
 
-.layoutSplitRightTitle h2 {
-  flex-basis: 40%;
-  text-align: right;
-  font-size: 3.5rem;
-  line-height: 1.3;
-  margin-bottom: 0;
-  order: 2; /* CSS魔法：在DOM中h2在p前面，但在视觉上排到后面 */
-}
-
-.layoutSplitRightTitle p {
-  flex-basis: 55%;
-  text-align: right; /* <-- The only change needed is here */
-  max-width: none; /* 覆盖默认的max-width */
-  order: 1;
-  line-height: 1.8; /* 分割布局下，行高可以稍微紧凑一些 */
+.layoutSplitRightTitle .textBlock {
+  width: 45%; /* 限制文本宽度 */
+  text-align: right; /* 文本右对齐 */
+  margin-right: 6rem; /* ADD this for perfect symmetry with page 2 */
 }
 
 .layoutSplitRightTitle .gridBackground {
-  display: none; /* 分割布局下，网格背景会显得杂乱，故隐藏 */
+  display: none; /* 在此布局中隐藏网格，避免视觉混乱 */
 }
 
 /* 布局3: 最终居中，更聚焦 */
 .layoutCenterFinal {
   max-width: 700px; /* 宽度收窄，形成“诗柱” */
+  justify-content: center;
 }
 
 .layoutCenterFinal h2 {
@@ -324,7 +355,7 @@
 /* 新增：高亮文本的样式 */
 .highlightedText {
   color: #64ffda;
-  font-weight: 500; /* 比普通文本稍粗 */
+  font-weight: 600; /* 加粗以突出显示 */
   text-shadow: 0 0 8px rgba(100, 255, 218, 0.4);
   transition: color 0.3s, text-shadow 0.3s;
 } 

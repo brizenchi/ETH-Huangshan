@@ -1,151 +1,249 @@
-.overlay {
+.modalOverlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(10, 25, 47, 0.85);
   display: flex;
-  align-items: center;
   justify-content: center;
-  z-index: 1000;
-  backdrop-filter: blur(5px);
-}
-
-.modal {
-  background: #1a1a1d;
-  border: 1px solid #4e4e50;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 500px;
-  padding: 2rem;
-  color: #c5c6c7;
-  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
-  border-bottom: 1px solid #4e4e50;
-  padding-bottom: 1rem;
+  z-index: 1000;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: fadeIn 0.3s ease-out;
 }
 
-.header h2 {
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: 500;
-  color: #66fcf1;
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modalContent {
+  display: flex;
+  width: 90%;
+  max-width: 900px;
+  background-color: #0f172a; /* Dark blue-slate */
+  border-radius: 12px;
+  border: 1px solid rgba(100, 255, 218, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUp {
+  from { transform: translateY(30px) scale(0.98); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+/* Left Panel (Visual) */
+.leftPanel {
+  flex-basis: 40%;
+  background: linear-gradient(135deg, rgba(17, 24, 39, 0.8), rgba(30, 41, 59, 0.8));
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-right: 1px solid rgba(100, 255, 218, 0.1);
+}
+.leftPanel h3 {
+  font-size: 1.75rem;
+  color: #e6f1ff;
+  margin-top: 1.5rem;
+  text-align: center;
+  text-shadow: 0 0 10px rgba(100, 255, 218, 0.3);
+}
+.leftPanel p {
+  color: #94a3b8;
+  text-align: center;
+  line-height: 1.6;
+  font-size: 0.9rem;
+}
+
+/* Right Panel (Form) */
+.rightPanel {
+  flex-basis: 60%;
+  padding: 2.5rem;
+  position: relative;
 }
 
 .closeButton {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
   background: none;
   border: none;
-  font-size: 2rem;
-  color: #c5c6c7;
+  color: #64748b;
   cursor: pointer;
-  padding: 0;
-  line-height: 1;
+  padding: 0.5rem;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+.closeButton:hover {
+  color: #e6f1ff;
+  transform: rotate(90deg);
 }
 
 .form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.25rem;
 }
 
-.formGroup {
+.title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #64ffda; /* Aqua color */
+  margin: 0 0 0.5rem 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(100, 255, 218, 0.1);
+}
+
+.inputGroup {
   display: flex;
   flex-direction: column;
 }
-
-.formGroup label {
-  margin-bottom: 0.5rem;
+.inputGroup label {
+  font-size: 0.875rem;
   font-weight: 500;
-  color: #a5a6a7;
+  color: #cbd5e1;
+  margin-bottom: 0.5rem;
 }
 
-.formGroup input,
-.formGroup textarea {
-  background: #0b0c10;
-  border: 1px solid #4e4e50;
-  border-radius: 4px;
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.inputWrapper svg {
+  position: absolute;
+  left: 0.75rem;
+  color: #475569;
+}
+.inputWrapper input,
+.inputWrapper textarea {
+  width: 100%;
+  padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+  background-color: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  color: #e2e8f0;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.inputWrapper input:focus,
+.inputWrapper textarea:focus {
+  outline: none;
+  border-color: #64ffda;
+  box-shadow: 0 0 0 2px rgba(100, 255, 218, 0.2);
+}
+.inputWrapper textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Custom Dropzone */
+.dropzone {
+  border: 2px dashed #334155;
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+.dropzone.dragging, .dropzone:hover {
+  border-color: #64ffda;
+  background-color: rgba(100, 255, 218, 0.05);
+}
+.uploadPrompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: #94a3b8;
+}
+.uploadPrompt svg {
+  color: #64ffda;
+  margin-bottom: 0.5rem;
+}
+.uploadPrompt p { margin: 0; }
+.uploadPrompt span { font-size: 0.8rem; }
+.fileInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #e2e8f0;
+}
+.fileInfo button {
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+}
+.fileInfo button:hover { color: #e2e8f0; }
+
+.addressDisplay {
   padding: 0.75rem;
-  color: #c5c6c7;
-  font-size: 1rem;
+  background-color: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  color: #94a3b8;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 0.9rem;
+  word-break: break-all;
 }
 
-.formGroup input:disabled {
-  background: #2a2a2d;
-  cursor: not-allowed;
-}
-
-.formGroup input[type="file"] {
-  padding: 0.5rem;
-}
-
-.error {
-  color: #ff6b6b;
+.errorText {
+  color: #f87171;
+  font-size: 0.875rem;
   text-align: center;
 }
 
-.actions {
+.buttonGroup {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
   margin-top: 1rem;
 }
-
-.actions button {
+.cancelButton, .submitButton {
   padding: 0.75rem 1.5rem;
-  border-radius: 4px;
+  border-radius: 6px;
   border: none;
+  font-weight: 600;
   cursor: pointer;
-  font-size: 1rem;
-  font-weight: 500;
-  transition: all 0.2s ease-in-out;
+  transition: all 0.2s ease;
 }
-
 .cancelButton {
   background-color: transparent;
-  border: 1px solid #4e4e50;
-  color: #c5c6c7;
+  color: #94a3b8;
 }
-
 .cancelButton:hover {
-  background-color: #4e4e50;
+  background-color: #334155;
+  color: #e2e8f0;
 }
-
 .submitButton {
-  background-color: #66fcf1;
-  color: #0b0c10;
+  background-color: #64ffda;
+  color: #0f172a;
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 0.5rem;
 }
-
 .submitButton:hover {
-  filter: brightness(1.2);
+  box-shadow: 0 0 15px rgba(100, 255, 218, 0.4);
 }
-
 .submitButton:disabled {
-  background-color: #45a29e;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
-.spinner {
-  width: 1rem;
-  height: 1rem;
-  border: 2px solid rgba(11, 12, 16, 0.3);
-  border-top-color: #0b0c10;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
+/* Spinner */
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
+}
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(15, 23, 42, 0.5);
+  border-top-color: #0f172a;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
 } 

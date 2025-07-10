@@ -17,8 +17,9 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  /* Add a min-height to avoid layout shifts while text loads */
-  min-height: 40px; 
+  /* Let the content define the height naturally */
+  /* Remove min-height to allow smooth growing from zero */
+  overflow: hidden; /* This is the key fix */
 }
 
 /* Markdown content styles, copied for consistency */
@@ -48,10 +49,5 @@
 
 /* Ghost element for height calculation */
 .ghost {
-  visibility: hidden;
-  position: absolute;
-  z-index: -1;
-  /* Position it off-screen to be absolutely sure it doesn't affect layout */
-  top: -9999px;
-  left: -9999px;
+  display: none; /* No longer needed, hide it completely */
 } 

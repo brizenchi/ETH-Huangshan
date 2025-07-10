@@ -40,18 +40,37 @@ const ChatPage = () => {
   const { cid } = useParams();
   const { address: userAddress } = useWallet();
   const [agent, setAgent] = useState(null);
-  const [questions, setQuestions] = useState([]); // Re-introduced
-  const [activeQuestion, setActiveQuestion] = useState(null); // Re-introduced
+  const [questions, setQuestions] = useState([]);
+  const [activeQuestion, setActiveQuestion] = useState(null);
   const [newQuestion, setNewQuestion] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
   const pollingRef = useRef(null);
-  const pollingTaskRef = useRef(null);
+  const pollingStartedRef = useRef(false);
+  const optimisticQuestionIdRef = useRef(null);
   const lastSubmittedQuestion = useRef('');
+  const chatContentRef = useRef(null);
 
   const { data: hash, writeContract, isPending, reset } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed, error: confirmationError } = useWaitForTransactionReceipt({ hash });
+
+  const updateLoadingQuestion = useCallback((updates) => {
+    const loadingId = optimisticQuestionIdRef.current;
+    if (!loadingId) return;
+    setQuestions(prev =>
+      prev.map(q => (q.id === loadingId ? { ...q, ...updates } : q))
+    );
+  }, []); // Empty dependency array makes this function stable
+
+  const scrollToBottom = useCallback(() => {
+    if (chatContentRef.current) {
+      chatContentRef.current.scrollTo({
+        top: chatContentRef.current.scrollHeight,
+        behavior: 'smooth',
+      });
+    }
+  }, []);
 
   const handleAnimationEnd = useCallback((questionId) => {
     setQuestions(prev =>
@@ -79,6 +98,19 @@ const ChatPage = () => {
     fetchAgentDetails();
   }, [fetchAgentDetails]);
 
+  // Ensure activeQuestion is always valid
+  useEffect(() => {
+    if (questions.length > 0) {
+      const activeExists = questions.some(q => q.id === activeQuestion?.id);
+      if (!activeExists) {
+        setActiveQuestion(questions[0]);
+      }
+    } else {
+      setActiveQuestion(null);
+    }
+  }, [questions, activeQuestion]);
+
+
   const handleQuestionSubmit = (e) => {
     e.preventDefault();
     if (!newQuestion.trim() || !userAddress || isPending || isConfirming) return;
@@ -93,6 +125,9 @@ const ChatPage = () => {
       isNew: false,
     };
     
+    optimisticQuestionIdRef.current = optimisticQuestion.id;
+    pollingStartedRef.current = false; // Reset for new submission
+
     setQuestions(prev => [optimisticQuestion, ...prev]);
     setActiveQuestion(optimisticQuestion);
     setNewQuestion('');
@@ -100,53 +135,77 @@ const ChatPage = () => {
     writeContract({ address: contractAddress, abi: contractAbi, functionName: 'askQuestion', args: [cid, newQuestion], value: 1000000000000n });
   };
 
-  useEffect(() => {
-    pollingTaskRef.current = async () => {
+  const pollingTask = useCallback(async () => {
+    try {
         const response = await fetch(`/api/v1/agent/detail?cid=${cid}`);
         const result = await response.json();
         if (result.code === 200 && result.data) {
             const remoteQuestions = (result.data.questions || []).reverse();
             const newRemoteQuestion = remoteQuestions.find(q => q.question === lastSubmittedQuestion.current);
             if (newRemoteQuestion) {
-                clearInterval(pollingRef.current);
+                if (pollingRef.current) {
+                    clearInterval(pollingRef.current);
+                    pollingRef.current = null;
+                }
                 toast.success('AI 回复已收到！', { id: 'ask' });
                 const updatedQuestion = {
                     ...newRemoteQuestion,
                     status: 'complete',
                     isNew: true,
                 };
-                setQuestions(prev => prev.map(q => q.id === activeQuestion.id ? updatedQuestion : q));
+                const loadingId = optimisticQuestionIdRef.current;
+                setQuestions(prev => prev.map(q => q.id === loadingId ? updatedQuestion : q));
                 setActiveQuestion(updatedQuestion);
                 reset();
             }
         }
-    };
-  });
+    } catch (err) {
+        console.error("Polling failed:", err);
+        if (pollingRef.current) {
+            clearInterval(pollingRef.current);
+            pollingRef.current = null;
+        }
+        toast.error("Failed to retrieve AI response.", { id: 'ask' });
+        const loadingId = optimisticQuestionIdRef.current;
+        setQuestions(prev => prev.filter(q => q.id !== loadingId));
+    }
+  }, [cid, reset]);
+
 
   useEffect(() => {
-    const updateLoadingQuestion = (updates) => {
-      setQuestions(prev =>
-        prev.map(q => (q.id === activeQuestion?.id && q.status === 'loading' ? { ...q, ...updates } : q))
-      );
-    };
-
-    if (isPending) { updateLoadingQuestion({ progressStage: 'sending' }); return; }
-    if (isConfirming) { updateLoadingQuestion({ progressStage: 'confirming' }); return; }
+    if (isPending) {
+      updateLoadingQuestion({ progressStage: 'sending' });
+      return;
+    }
+    if (isConfirming) {
+      updateLoadingQuestion({ progressStage: 'confirming' });
+      return;
+    }
     if (confirmationError) {
       toast.error(confirmationError.shortMessage || "Transaction failed.", { id: 'ask' });
-      setQuestions(prev => prev.filter(q => q.status !== 'loading'));
-      setActiveQuestion(questions[0] || null);
+      const loadingId = optimisticQuestionIdRef.current;
+      setQuestions(prev => prev.filter(q => q.id !== loadingId));
       reset();
       return;
     }
-    if (isConfirmed) {
+    if (isConfirmed && !pollingStartedRef.current) {
+      pollingStartedRef.current = true;
       updateLoadingQuestion({ progressStage: 'polling' });
       const timeoutId = setTimeout(() => updateLoadingQuestion({ progressStage: 'generating' }), 4000);
-      pollingRef.current = setInterval(() => pollingTaskRef.current(), 3000);
-      // ... (timeout and cleanup logic)
-      return () => { clearTimeout(timeoutId); clearInterval(pollingRef.current); };
+      
+      pollingTask(); // Poll immediately once for faster response
+      pollingRef.current = setInterval(pollingTask, 3000);
+
+      return () => {
+        clearTimeout(timeoutId);
+        if (pollingRef.current) {
+          clearInterval(pollingRef.current);
+          pollingRef.current = null;
+        }
+      };
     }
-  }, [isPending, isConfirming, isConfirmed, confirmationError, reset, activeQuestion, questions]);
+  }, [isPending, isConfirming, isConfirmed, confirmationError, reset, updateLoadingQuestion, pollingTask]);
+
 
   if (loading) return <div className={styles.container}><p>Loading agent...</p></div>;
   if (error) return <div className={styles.container}><p>Error: {error}</p></div>;
@@ -179,7 +238,7 @@ const ChatPage = () => {
       <div className={styles.chatLayout}>
         <div className={styles.questionList}>
           {questions.map(q => (
-            <button
+            <button 
               key={q.id}
               className={`${styles.tab} ${activeQuestion?.id === q.id ? styles.active : ''} ${q.status === 'loading' ? styles.loading : ''}`}
               onClick={() => setActiveQuestion(q)}
@@ -189,7 +248,7 @@ const ChatPage = () => {
           ))}
         </div>
         <div className={styles.chatContainer}>
-          <div className={styles.chatContent}>
+        <div className={styles.chatContent} ref={chatContentRef}>
             {activeQuestion && (
               <>
                 <div className={`${styles.bubble} ${styles.userBubble}`}>{activeQuestion.question}</div>
@@ -209,7 +268,7 @@ const ChatPage = () => {
                       tx: activeQuestion.transaction_hash
                     }} 
                     onAnimationEnd={handleAnimationEnd} 
-                    scrollToBottom={() => {}} 
+                    scrollToBottom={scrollToBottom} 
                     IconAddressLink={IconAddressLink} 
                     CidIcon={CidIcon} 
                     TransactionIcon={TransactionIcon} 
@@ -235,12 +294,12 @@ const ChatPage = () => {
                            link={`https://sepolia.etherscan.io/tx/${activeQuestion.transaction_hash}`} 
                            title="Transaction" 
                          />
-                       )}
-                    </div>
-                  </div>
+                )}
+              </div>
+            </div>
                 )}
               </>
-            )}
+          )}
           </div>
         </div>
       </div>
