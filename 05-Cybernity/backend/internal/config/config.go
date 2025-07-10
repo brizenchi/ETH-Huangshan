@@ -1,22 +1,26 @@
 package config
 
 import (
-	"cybernity/pkg/core/jwt"
+	"cybernity/pkg/core/eth"
 	"cybernity/pkg/core/llm"
 	"cybernity/pkg/core/logger"
+	"cybernity/pkg/core/pg"
+	"cybernity/pkg/core/pinata"
 	"os"
 
 	"gopkg.in/yaml.v2"
 )
 
 type Config struct {
-	Name     string        `yaml:"name"`
-	Addr     string        `yaml:"addr"`
-	RunMode  string        `yaml:"run_mode"`
-	Timezone string        `yaml:"timezone"`
-	Log      logger.Config `yaml:"log"`
-	LLM      llm.LLMConfig `yaml:"llm"`
-	Jwt      jwt.Config    `yaml:"jwt"`
+	Name     string           `yaml:"name"`
+	Addr     string           `yaml:"addr"`
+	RunMode  string           `yaml:"run_mode"`
+	Timezone string           `yaml:"timezone"`
+	Log      logger.Config    `yaml:"log"`
+	LLM      llm.LLMConfig    `yaml:"llm"`
+	Eth      eth.Config       `yaml:"eth"`
+	Postgres pg.ProjectConfig `yaml:"postgres"`
+	Pinata   pinata.Config    `yaml:"pinata"`
 }
 
 var AppConfig Config

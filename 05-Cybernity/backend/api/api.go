@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"cybernity/internal/config"
+	"cybernity/internal/handler/agent"
 	"cybernity/internal/handler/sd"
 
 	"github.com/gin-gonic/gin"
@@ -35,6 +36,11 @@ func Load(e *gin.Engine, mw ...gin.HandlerFunc) *gin.Engine {
 		svcd := v1.Group("/sd")
 		{
 			svcd.GET("/health", sd.HealthCheck)
+		}
+		agentRouter := v1.Group("/agent")
+		{
+			agentRouter.POST("/generate", agent.Generate)
+			agentRouter.GET("/list", agent.List)
 		}
 
 	}

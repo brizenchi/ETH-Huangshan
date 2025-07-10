@@ -1,3 +1,19 @@
+arweave
+测试上传文档
+npm run upload -- 'Hello, Cybernity! Testing confirmation.'
+
+
+agent
+address A 创建agent
+registerAgent 
+param: 100000 bafkreibn3xblxbxtklvdiij7azzxdq7ovhw2xfyadpxjvjiepx2yhnzzxi
+address B 
+askquestion 
+value: 1000000
+param:  你是谁
+
+
+
 ```mermaid
 sequenceDiagram
 participant User A

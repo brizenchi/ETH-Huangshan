@@ -35,7 +35,6 @@ WORKDIR /app
 ENV TZ=UTC
 # 从 builder 阶段复制编译好的二进制文件
 COPY --from=builder /build/cybernity .
-COPY --from=builder /build/city_code.json .
 
 # 设置启动命令
 ENTRYPOINT ["/app/cybernity"]

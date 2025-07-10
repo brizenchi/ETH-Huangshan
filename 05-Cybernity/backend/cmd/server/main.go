@@ -4,9 +4,10 @@ import (
 	"context"
 	"cybernity/api"
 	"cybernity/internal/config"
-	"cybernity/pkg/core/jwt"
+	"cybernity/internal/listener"
 	"cybernity/pkg/core/llm"
 	"cybernity/pkg/core/logger"
+	"cybernity/pkg/core/pg"
 	"flag"
 	"net/http"
 	"os"
@@ -45,8 +46,10 @@ func main() {
 	if err := llm.InitWithConfig(&config.AppConfig.LLM); err != nil {
 		log.Fatalf("Failed to initialize llm: %v", err)
 	}
+	if err := pg.GetManager().Init(&config.AppConfig.Postgres); err != nil {
+		log.Fatalf("Failed to initialize postgres: %v", err)
+	}
 
-	jwt.InitConfig(&config.AppConfig.Jwt)
 	// 现在可以使用 config.AppConfig 访问配置
 	logger.Infof(context.Background(), "Server Name: %s", config.AppConfig.Name)
 
@@ -56,12 +59,9 @@ func main() {
 	api.Load(
 		g,
 	)
-	// ticker.BackendTask()
-	initService()
+	go listener.EventListener(context.Background(), config.AppConfig.Eth)
 
 	addr := config.AppConfig.Addr // Assuming the address is stored in the Log.Path for demonstration
 	logger.Infof(context.Background(), "Start to listening the incoming requests on http address: %s", addr)
 	logger.Info(context.Background(), http.ListenAndServe(addr, g).Error())
-}
-func initService() {
 }
