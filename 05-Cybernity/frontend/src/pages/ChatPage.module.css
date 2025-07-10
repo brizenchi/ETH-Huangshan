@@ -19,42 +19,69 @@
 }
 
 .header {
-  margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid #444;
+  padding: 1.5rem 2rem; /* Adjusted padding for a tighter look */
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  border-bottom: 1px solid rgba(100, 255, 218, 0.1);
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(100, 255, 218, 0.1);
+  border: 1px solid rgba(100, 255, 218, 0.2);
+  color: #cdd6f4;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 500;
+  align-self: flex-start; /* Position it to the left */
+  transition: all 0.2s ease;
+}
+
+.backButton:hover {
+  background: rgba(100, 255, 218, 0.2);
+  color: #ffffff;
+  border-color: rgba(100, 255, 218, 0.4);
 }
 
 .agentInfo {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  align-items: center; /* Vertically center the avatar and text */
   gap: 2rem;
+  width: 100%;
 }
 
 .agentDetails {
-  text-align: left;
+  flex: 1 1 60%; 
+  min-width: 0; 
 }
 
-.agentInfo h2 {
+.agentDetails h2 {
   font-size: 2.5rem;
-  margin-bottom: 0.5rem;
-  margin-top: 0;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #e6f1ff;
+  margin: 0 0 0.5rem 0;
+  word-break: break-word; /* Allow long names to wrap */
 }
 
-.agentInfo p {
-  font-size: 1.1rem;
-  color: #ccc;
-  max-width: 600px;
+.agentDetails p {
+  font-size: 1rem;
+  color: #a6adc8;
   margin: 0;
 }
 
 .agentMeta {
-  text-align: right;
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 0.9rem;
-  color: #aaa;
-  flex-shrink: 0;
-  padding-top: 0.5rem;
+  flex: 0 0 auto; /* Don't grow, don't shrink, auto size */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end; /* Align text to the right */
+  gap: 0.8rem;
+  max-width: 40%;
+  font-family: 'Roboto Mono', monospace; /* Apply monospace font to the container */
 }
 
 .agentMeta p {
@@ -65,27 +92,42 @@
   margin-bottom: 0;
 }
 
-.chatContainer {
-  width: 100%;
-  max-width: 900px;
-  background: rgba(12, 15, 22, 0.8);
-  border: 1px solid #313244;
-  border-radius: 8px;
-  backdrop-filter: blur(10px);
+.chatLayout {
+  flex-grow: 1;
   display: flex;
-  flex-direction: column;
-  flex: 1; /* Allow this container to fill available space */
-  min-height: 0; /* Important fix for flexbox overflow */
+  min-height: 0; /* Critical for flex + overflow */
+  gap: 1.5rem;
+  padding: 0 2rem 2rem 2rem; /* Add padding around the layout */
+  margin-top: 1.5rem; /* Add vertical spacing below the header */
 }
 
-.tabs {
+.questionList {
+  flex-basis: 160px; /* Further reduced width */
+  flex-shrink: 0;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  overflow-y: auto; /* Allow tabs to scroll if they overflow */
-  flex-shrink: 0;
-  padding-right: 1rem;
+  padding-right: 1.5rem;
   border-right: 1px solid rgba(100, 255, 218, 0.1);
+  /* Custom scrollbar for Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 255, 218, 0.3) transparent;
+}
+
+/* Custom Scrollbar for Webkit browsers */
+.questionList::-webkit-scrollbar {
+  width: 6px;
+}
+.questionList::-webkit-scrollbar-track {
+  background: transparent;
+}
+.questionList::-webkit-scrollbar-thumb {
+  background-color: rgba(100, 255, 218, 0.2);
+  border-radius: 3px;
+}
+.questionList::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(100, 255, 218, 0.4);
 }
 
 .tab {
@@ -93,33 +135,65 @@
   border: 1px solid transparent;
   color: #a9b7d1;
   padding: 0.75rem 1rem;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   text-align: left;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
 .tab:hover {
   background: rgba(100, 255, 218, 0.1);
-  color: #66fcf1;
+  color: #cdd6f4;
 }
 
 .tab.active {
-  background: rgba(100, 255, 218, 0.2);
-  border-color: rgba(100, 255, 218, 0.5);
-  color: #66fcf1;
-  font-weight: 500;
-  border-bottom-color: #64ffda;
+  background: rgba(100, 255, 218, 0.15);
   color: #ffffff;
+  font-weight: 500;
+}
+
+.tab.loading {
+  color: #6c7086;
+  font-style: italic;
+}
+
+.chatContainer {
+  flex: 1; 
+  min-height: 0; 
+  display: flex;
+  flex-direction: column;
 }
 
 .chatContent {
-  padding: 1.5rem;
-  background-color: rgba(22, 34, 42, 0.7);
-  border-radius: 0 8px 8px 8px;
+  padding-right: 1rem; /* Add some padding for the scrollbar */
+  padding-left: 1rem;
   flex-grow: 1;
-  overflow-y: auto; /* Allow vertical scrolling for long content */
+  overflow-y: auto; 
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem; /* Increased spacing between bubbles */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 255, 218, 0.3) transparent;
+}
+
+/* Custom Scrollbar for Webkit browsers */
+.chatContent::-webkit-scrollbar {
+  width: 8px;
+}
+.chatContent::-webkit-scrollbar-track {
+  background: transparent;
+}
+.chatContent::-webkit-scrollbar-thumb {
+  background-color: rgba(100, 255, 218, 0.3);
+  border-radius: 4px;
+  border: 1px solid rgba(100, 255, 218, 0.5);
+}
+.chatContent::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(100, 255, 218, 0.5);
 }
 
 .chatItem {
@@ -128,99 +202,82 @@
   gap: 1rem;
 }
 
-.question {
-  font-weight: 600;
-  color: #e6f1ff;
-  flex-shrink: 0; /* 防止问题标签在flex布局中被压缩 */
-}
+/* 移除不再使用的 .question, .answer, 和 .answerLabel 样式 */
 
-.answer {
-  color: #cdd6f4;
+/* --- 全新的气泡对话样式 --- */
+
+/* 基础气泡样式 */
+.bubble {
+  padding: 0.8rem 1.2rem;
+  border-radius: 16px;
+  max-width: 80%;
   line-height: 1.6;
-  display: flex; /* Use flexbox for alignment */
-  align-items: flex-start; /* Align items to the top */
+  backdrop-filter: blur(10px); /* 磨砂玻璃效果 */
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1); /* 微妙的边框 */
 }
 
-/* New: Wrapper for the markdown content to control flex behavior */
-.markdownContent {
-  flex-grow: 1; /* Allow the content to take up the remaining space */
-  min-width: 0; /* Critical fix for flexbox overflow/wrapping issues */
-}
-
-/* New: Style for the "A: " label */
-.answerLabel {
-  font-weight: 600;
+/* 用户气泡 (右对齐) */
+.userBubble {
+  align-self: flex-end;
+  background-color: rgba(100, 255, 218, 0.15); /* 青色调，半透明 */
   color: #e6f1ff;
-  margin-right: 0.5rem; /* Space between label and content */
-  flex-shrink: 0; /* Prevent the label from shrinking */
+  border-radius: 16px 16px 4px 16px; /* 调整圆角以形成箭头感 */
 }
 
-/* Styling for markdown-generated content */
-.answer p {
-  margin: 0;
-  margin-bottom: 1em; /* Add space between paragraphs */
+/* AI 气泡 (左对齐) */
+.aiBubble {
+  align-self: flex-start;
+  background-color: rgba(49, 50, 68, 0.4); /* 灰色调，半透明 */
+  color: #cdd6f4;
+  border-radius: 16px 16px 16px 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
-.answer p:last-child {
+/* New style for pending/sent messages */
+.pending {
+  opacity: 0.6;
+}
+
+/* 确保 markdown 容器正确工作 */
+.markdownContent {
+  flex-grow: 1; 
+  min-width: 0; 
+  color: inherit; /* 从父气泡继承文字颜色 */
+}
+
+/* 更新 Markdown 元素样式以适应气泡 */
+.markdownContent p {
+  margin: 0 0 0.5em 0;
+}
+.markdownContent p:last-child {
   margin-bottom: 0;
 }
-
-.answer a {
+.markdownContent a {
   color: #89b4fa;
-  text-decoration: none;
-  border-bottom: 1px dotted #89b4fa;
+}
+.markdownContent code {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+.markdownContent pre {
+  background-color: rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
-.answer a:hover {
-  color: #a6e3a1;
-  border-bottom-color: #a6e3a1;
-}
-
-.answer code {
-  background-color: rgba(22, 27, 42, 0.8);
-  padding: 0.2em 0.4em;
-  margin: 0;
-  font-size: 85%;
-  border-radius: 6px;
-  font-family: 'Fira Code', 'Roboto Mono', monospace;
-}
-
-.answer pre {
-  background-color: #11111b; /* A darker background for code blocks */
-  padding: 1rem;
-  border-radius: 8px;
-  overflow-x: auto;
-  border: 1px solid #313244;
-}
-
-.answer pre code {
-  background-color: transparent;
-  padding: 0;
-  margin: 0;
-  font-size: inherit;
-  border-radius: 0;
-}
-
-.answer ul, .answer ol {
-  padding-left: 2rem;
-}
-
-.answer blockquote {
-  border-left: 3px solid #585b70;
-  padding-left: 1rem;
-  margin-left: 0;
-  color: #a6adc8;
-}
-
-.metadata {
-  font-size: 0.8rem;
-  color: #6c7086; /* Muted color */
-  opacity: 0.7;
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-  border-top: 1px solid rgba(100, 255, 218, 0.1);
+/* New: Styles for the footer inside the AI bubble */
+.bubbleFooter {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   padding-top: 0.75rem;
+  display: flex;
+  flex-wrap: wrap; /* Allow items to wrap on small screens */
+  gap: 0.75rem;
+}
+
+/* Hide the old metadata container */
+.metadata {
+  display: none;
 }
 
 .questionForm {

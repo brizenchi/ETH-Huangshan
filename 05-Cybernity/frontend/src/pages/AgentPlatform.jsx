@@ -26,7 +26,7 @@ const AgentPlatform = () => {
             cid: agent.cid, // <-- Add this
             name: agent.name,
             bio: agent.description,
-            avatar: agent.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase(),
+            address: agent.agent_address, // Pass the address
           }));
           setAgents(formattedAgents);
         } else {
@@ -51,7 +51,7 @@ const AgentPlatform = () => {
       cid: newAgentData.cid, // <-- Add this
       name: newAgentData.name,
       bio: newAgentData.description,
-      avatar: newAgentData.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase(),
+      address: newAgentData.agent_address, // Pass the address
     };
     setAgents(prevAgents => [newAgent, ...prevAgents]);
     handleCloseModal();

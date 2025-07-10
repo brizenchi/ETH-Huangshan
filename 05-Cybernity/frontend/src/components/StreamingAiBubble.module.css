@@ -1,0 +1,57 @@
+/* Base bubble styles, copied for consistency */
+.bubble {
+  padding: 0.8rem 1.2rem;
+  border-radius: 16px;
+  max-width: 80%;
+  line-height: 1.6;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.aiBubble {
+  align-self: flex-start;
+  background-color: rgba(49, 50, 68, 0.4); 
+  color: #cdd6f4;
+  border-radius: 16px 16px 16px 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  /* Add a min-height to avoid layout shifts while text loads */
+  min-height: 40px; 
+}
+
+/* Markdown content styles, copied for consistency */
+.markdownContent {
+  flex-grow: 1; 
+  min-width: 0; 
+  color: inherit;
+}
+
+.markdownContent p { margin: 0 0 0.5em 0; }
+.markdownContent p:last-child { margin-bottom: 0; }
+.markdownContent a { color: #89b4fa; }
+.markdownContent code { background-color: rgba(0, 0, 0, 0.2); }
+.markdownContent pre {
+  background-color: rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Footer styles, copied for consistency */
+.bubbleFooter {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+/* Ghost element for height calculation */
+.ghost {
+  visibility: hidden;
+  position: absolute;
+  z-index: -1;
+  /* Position it off-screen to be absolutely sure it doesn't affect layout */
+  top: -9999px;
+  left: -9999px;
+} 

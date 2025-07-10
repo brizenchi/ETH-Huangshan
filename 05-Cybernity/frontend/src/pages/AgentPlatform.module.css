@@ -31,7 +31,28 @@
   max-width: 1400px;
   margin: 0 auto;
   padding-bottom: 4rem;
+  padding-right: 1rem; /* Add some padding for the scrollbar */
+  padding-left: 1rem;
+  /* Custom scrollbar for Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 255, 218, 0.3) transparent;
 } 
+
+/* Custom Scrollbar for Webkit browsers */
+.agentList::-webkit-scrollbar {
+  width: 8px;
+}
+.agentList::-webkit-scrollbar-track {
+  background: transparent;
+}
+.agentList::-webkit-scrollbar-thumb {
+  background-color: rgba(100, 255, 218, 0.3);
+  border-radius: 4px;
+  border: 1px solid rgba(100, 255, 218, 0.5);
+}
+.agentList::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(100, 255, 218, 0.5);
+}
 
 .message,
 .error {

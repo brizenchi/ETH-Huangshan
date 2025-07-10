@@ -1,0 +1,18 @@
+.avatarContainer {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0; /* Prevent flex items from shrinking the avatar */
+  
+  /* --- 赛博朋克切角造型 --- */
+  background-color: rgba(25, 28, 36, 0.8); /* 深色背景，更衬托头像 */
+  clip-path: polygon(15% 0, 85% 0, 100% 15%, 100% 85%, 85% 100%, 15% 100%, 0 85%, 0 15%);
+
+  /* 使用 drop-shadow 替代 box-shadow，使其能贴合 clip-path 的形状 */
+  filter: drop-shadow(0 0 6px rgba(100, 255, 218, 0.4));
+  transition: filter 0.3s ease;
+}
+
+.avatarContainer:hover {
+  filter: drop-shadow(0 0 12px rgba(100, 255, 218, 0.7));
+} 

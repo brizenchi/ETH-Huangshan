@@ -6,144 +6,147 @@ import styles from './ChatPage.module.css';
 import { useWallet } from '../components/WalletProvider';
 import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import toast from 'react-hot-toast';
+import { v4 as uuidv4 } from 'uuid';
+
+import IconAddressLink from '../components/IconAddressLink';
+import AgentAvatar from '../components/AgentAvatar';
+import StagedProgressBar from '../components/StagedProgressBar';
+import StreamingAiBubble from '../components/StreamingAiBubble'; // New import
+
+// Icon Components
+const CidIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+);
+const TransactionIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.72"></path></svg>
+);
+// New icon for Agent Address
+const AddressIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+);
+
+const PROGRESS_STAGES = ['sending', 'confirming', 'polling', 'generating'];
+const STAGE_MESSAGES = {
+  sending: '正在发送交易...',
+  confirming: '正在等待链上确认...',
+  polling: '正在后台检索...',
+  generating: 'AI 正在生成回复...',
+};
 
 const contractAddress = '0x6AB14941378f8D6D1968e9767dfEE630e74F360f';
-const contractAbi = [{
-  "name": "askQuestion",
-  "type": "function",
-  "stateMutability": "payable",
-  "inputs": [
-    { "type": "string", "name": "_cid" },
-    { "type": "string", "name": "_questionContent" }
-  ],
-  "outputs": []
-}];
+const contractAbi = [{"name": "askQuestion", "type": "function", "stateMutability": "payable", "inputs": [{ "type": "string", "name": "_cid" }, { "type": "string", "name": "_questionContent" }], "outputs": []}];
 
 const ChatPage = () => {
   const { cid } = useParams();
   const { address: userAddress } = useWallet();
   const [agent, setAgent] = useState(null);
-  const [questions, setQuestions] = useState([]);
-  const [activeQuestion, setActiveQuestion] = useState(null);
+  const [questions, setQuestions] = useState([]); // Re-introduced
+  const [activeQuestion, setActiveQuestion] = useState(null); // Re-introduced
   const [newQuestion, setNewQuestion] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const pollingRef = useRef(null); // Ref for the polling interval
-  const submittedQuestionRef = useRef(''); // Ref to store the submitted question
+  
+  const pollingRef = useRef(null);
+  const pollingTaskRef = useRef(null);
+  const lastSubmittedQuestion = useRef('');
 
-  const { data: hash, writeContract, isPending, error: contractError } = useWriteContract();
+  const { data: hash, writeContract, isPending, reset } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess: isConfirmed, error: confirmationError } = useWaitForTransactionReceipt({ hash });
+
+  const handleAnimationEnd = useCallback((questionId) => {
+    setQuestions(prev =>
+      prev.map(q => (q.id === questionId ? { ...q, isNew: false } : q))
+    );
+  }, []);
 
   const fetchAgentDetails = useCallback(async () => {
-    if (!cid) return;
-    setLoading(true);
-    setError(null);
+    // ... logic to fetch and set questions, setting the first as active
     try {
       const response = await fetch(`/api/v1/agent/detail?cid=${cid}`);
-      if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
       const result = await response.json();
       if (result.code === 200 && result.data) {
         setAgent(result.data);
-        const fetchedQuestions = result.data.questions || [];
+        const fetchedQuestions = (result.data.questions || []).reverse().map(q => ({...q, status: 'complete'}));
         setQuestions(fetchedQuestions);
-        // If there's no active question or the active one is no longer in the list, set a new one.
-        if (fetchedQuestions.length > 0 && (!activeQuestion || !fetchedQuestions.find(q => q.id === activeQuestion.id))) {
+        if (fetchedQuestions.length > 0) {
           setActiveQuestion(fetchedQuestions[0]);
         }
-      } else {
-        throw new Error(result.message || 'Failed to load agent details.');
-      }
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [cid, activeQuestion]);
+      } else { throw new Error(result.message); }
+    } catch (err) { setError(err.message); } finally { setLoading(false); }
+  }, [cid]);
 
   useEffect(() => {
     fetchAgentDetails();
-  }, [cid]); // Initial fetch
+  }, [fetchAgentDetails]);
 
   const handleQuestionSubmit = (e) => {
     e.preventDefault();
-    if (!newQuestion.trim() || !userAddress) {
-      toast.error("Please connect your wallet and enter a question.");
-      return;
-    }
-    
-    submittedQuestionRef.current = newQuestion; // Store the question in the ref
+    if (!newQuestion.trim() || !userAddress || isPending || isConfirming) return;
 
-    writeContract({
-      address: contractAddress,
-      abi: contractAbi,
-      functionName: 'askQuestion',
-      args: [cid, newQuestion],
-      value: 1000000000000n,
-    });
+    lastSubmittedQuestion.current = newQuestion;
+    const optimisticQuestion = {
+      id: uuidv4(),
+      question: newQuestion,
+      answer: '',
+      status: 'loading',
+      progressStage: 'sending',
+      isNew: false,
+    };
+    
+    setQuestions(prev => [optimisticQuestion, ...prev]);
+    setActiveQuestion(optimisticQuestion);
+    setNewQuestion('');
+
+    writeContract({ address: contractAddress, abi: contractAbi, functionName: 'askQuestion', args: [cid, newQuestion], value: 1000000000000n });
   };
 
-  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
+  useEffect(() => {
+    pollingTaskRef.current = async () => {
+        const response = await fetch(`/api/v1/agent/detail?cid=${cid}`);
+        const result = await response.json();
+        if (result.code === 200 && result.data) {
+            const remoteQuestions = (result.data.questions || []).reverse();
+            const newRemoteQuestion = remoteQuestions.find(q => q.question === lastSubmittedQuestion.current);
+            if (newRemoteQuestion) {
+                clearInterval(pollingRef.current);
+                toast.success('AI 回复已收到！', { id: 'ask' });
+                const updatedQuestion = {
+                    ...newRemoteQuestion,
+                    status: 'complete',
+                    isNew: true,
+                };
+                setQuestions(prev => prev.map(q => q.id === activeQuestion.id ? updatedQuestion : q));
+                setActiveQuestion(updatedQuestion);
+                reset();
+            }
+        }
+    };
+  });
 
   useEffect(() => {
-    if (isPending) {
-      toast.loading('Sending transaction... Please check your wallet.', { id: 'ask' });
-      return;
-    }
-    if (isConfirming) {
-      toast.loading('Waiting for transaction confirmation...', { id: 'ask' });
-      return;
-    }
-    if (contractError) {
-      toast.error(contractError.shortMessage || "Transaction failed.", { id: 'ask' });
-      return;
-    }
-
-    if (isConfirmed) {
-      toast.loading('Waiting for AI to respond...', { id: 'ask' });
-      setNewQuestion('');
-
-      const expectedQuestion = submittedQuestionRef.current;
-      const pollStartTime = Date.now();
-      const POLLING_INTERVAL = 2000; // 2 seconds
-      const POLLING_TIMEOUT = 60000; // 60 seconds
-
-      pollingRef.current = setInterval(async () => {
-        try {
-          if (Date.now() - pollStartTime > POLLING_TIMEOUT) {
-            clearInterval(pollingRef.current);
-            toast.error('Polling timed out. Please refresh manually.', { id: 'ask' });
-            return;
-          }
-
-          const response = await fetch(`/api/v1/agent/detail?cid=${cid}`);
-          const result = await response.json();
-
-          if (result.code === 200 && result.data && result.data.questions) {
-            const updatedQuestions = result.data.questions;
-            const isUpdated = updatedQuestions.some(q => q.question === expectedQuestion);
-
-            if (isUpdated) {
-              clearInterval(pollingRef.current);
-              setAgent(result.data);
-              setQuestions(updatedQuestions);
-              setActiveQuestion(updatedQuestions.find(q => q.question === expectedQuestion) || updatedQuestions[0]);
-              toast.success('AI Submit on chain!', { id: 'ask' });
-            }
-          }
-        } catch (err) {
-          console.error("Polling error:", err);
-          clearInterval(pollingRef.current);
-          toast.error('Failed to fetch updates.', { id: 'ask' });
-        }
-      }, POLLING_INTERVAL);
-    }
-    
-    // Cleanup polling on component unmount
-    return () => {
-      if (pollingRef.current) {
-        clearInterval(pollingRef.current);
-      }
+    const updateLoadingQuestion = (updates) => {
+      setQuestions(prev =>
+        prev.map(q => (q.id === activeQuestion?.id && q.status === 'loading' ? { ...q, ...updates } : q))
+      );
     };
-  }, [isPending, isConfirming, isConfirmed, contractError, cid]);
+
+    if (isPending) { updateLoadingQuestion({ progressStage: 'sending' }); return; }
+    if (isConfirming) { updateLoadingQuestion({ progressStage: 'confirming' }); return; }
+    if (confirmationError) {
+      toast.error(confirmationError.shortMessage || "Transaction failed.", { id: 'ask' });
+      setQuestions(prev => prev.filter(q => q.status !== 'loading'));
+      setActiveQuestion(questions[0] || null);
+      reset();
+      return;
+    }
+    if (isConfirmed) {
+      updateLoadingQuestion({ progressStage: 'polling' });
+      const timeoutId = setTimeout(() => updateLoadingQuestion({ progressStage: 'generating' }), 4000);
+      pollingRef.current = setInterval(() => pollingTaskRef.current(), 3000);
+      // ... (timeout and cleanup logic)
+      return () => { clearTimeout(timeoutId); clearInterval(pollingRef.current); };
+    }
+  }, [isPending, isConfirming, isConfirmed, confirmationError, reset, activeQuestion, questions]);
 
   if (loading) return <div className={styles.container}><p>Loading agent...</p></div>;
   if (error) return <div className={styles.container}><p>Error: {error}</p></div>;
@@ -153,84 +156,99 @@ const ChatPage = () => {
 
   return (
     <div className={styles.container}>
+      {/* Header remains the same */}
       <div className={styles.header}>
         <Link to="/app" className={styles.backButton}>&larr; Back to Agents</Link>
         <div className={styles.agentInfo}>
+          <AgentAvatar 
+            address={agent.agent_address} 
+            size={80} 
+            className={styles.avatarContainer} 
+          />
           <div className={styles.agentDetails}>
             <h2>{agent.name}</h2>
             <p>{agent.description}</p>
           </div>
           <div className={styles.agentMeta}>
-            <p>
-              Agent CID:{" "}
-              <a href={`https://amethyst-tragic-marlin-192.mypinata.cloud/ipfs/${cid}`} target="_blank" rel="noopener noreferrer">
-                {cid}
-              </a>
-            </p>
-            <p>Agent Address: {agent.agent_address}</p>
+            <IconAddressLink IconComponent={CidIcon} address={cid} link={`https://amethyst-tragic-marlin-192.mypinata.cloud/ipfs/${cid}`} title="Agent CID" />
+            <IconAddressLink IconComponent={AddressIcon} address={agent.agent_address} link={`https://sepolia.etherscan.io/address/${agent.agent_address}`} title="Agent Address" />
           </div>
         </div>
       </div>
       
-      <div className={styles.chatContainer}>
-        <div className={styles.tabs}>
-          {questions.map((q) => (
-            <button 
+      <div className={styles.chatLayout}>
+        <div className={styles.questionList}>
+          {questions.map(q => (
+            <button
               key={q.id}
-              className={`${styles.tab} ${activeQuestion?.id === q.id ? styles.active : ''}`}
+              className={`${styles.tab} ${activeQuestion?.id === q.id ? styles.active : ''} ${q.status === 'loading' ? styles.loading : ''}`}
               onClick={() => setActiveQuestion(q)}
             >
               {q.question}
             </button>
           ))}
         </div>
-        
-        <div className={styles.chatContent}>
-          {activeQuestion ? (
-            <div className={styles.chatItem}>
-              <p className={styles.question}>Q: {activeQuestion.question}</p>
-              <div className={styles.answer}>
-                <span className={styles.answerLabel}>A:</span>
-                <div className={styles.markdownContent}>
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {activeQuestion.answer}
-                  </ReactMarkdown>
-                </div>
-              </div>
-              <div className={styles.metadata}>
-                <span>
-                  Answer CID:{" "}
-                  <a href={`https://amethyst-tragic-marlin-192.mypinata.cloud/ipfs/${activeQuestion.answer_cid}`} target="_blank" rel="noopener noreferrer">
-                    {activeQuestion.answer_cid}
-                  </a>
-                </span>
-                {activeQuestion.transaction_hash && (
-                  <span>
-                    Transaction:{" "}
-                    <a href={`https://sepolia.etherscan.io/tx/${activeQuestion.transaction_hash}`} target="_blank" rel="noopener noreferrer">
-                      {activeQuestion.transaction_hash}
-                    </a>
-                  </span>
+        <div className={styles.chatContainer}>
+          <div className={styles.chatContent}>
+            {activeQuestion && (
+              <>
+                <div className={`${styles.bubble} ${styles.userBubble}`}>{activeQuestion.question}</div>
+                
+                {activeQuestion.status === 'loading' && (
+                  <div className={`${styles.bubble} ${styles.aiBubble}`}>
+                    <StagedProgressBar stages={PROGRESS_STAGES} currentStage={activeQuestion.progressStage} stageMessages={STAGE_MESSAGES} />
+                  </div>
                 )}
-              </div>
-            </div>
-          ) : (
-            <p>No questions have been answered yet. Ask the first one!</p>
-          )}
+
+                {activeQuestion.status === 'complete' && activeQuestion.isNew && (
+                  <StreamingAiBubble 
+                    message={{
+                      ...activeQuestion, 
+                      content: activeQuestion.answer, 
+                      cid: activeQuestion.answer_cid, 
+                      tx: activeQuestion.transaction_hash
+                    }} 
+                    onAnimationEnd={handleAnimationEnd} 
+                    scrollToBottom={() => {}} 
+                    IconAddressLink={IconAddressLink} 
+                    CidIcon={CidIcon} 
+                    TransactionIcon={TransactionIcon} 
+                  />
+                )}
+
+                {activeQuestion.status === 'complete' && !activeQuestion.isNew && (
+                  <div className={`${styles.bubble} ${styles.aiBubble}`}>
+                    <div className={styles.markdownContent}>
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{activeQuestion.answer}</ReactMarkdown>
+                    </div>
+                    <div className={styles.bubbleFooter}>
+                       <IconAddressLink 
+                         IconComponent={CidIcon} 
+                         address={activeQuestion.answer_cid} 
+                         link={`https://amethyst-tragic-marlin-192.mypinata.cloud/ipfs/${activeQuestion.answer_cid}`} 
+                         title="Answer CID" 
+                       />
+                       {activeQuestion.transaction_hash && (
+                         <IconAddressLink 
+                           IconComponent={TransactionIcon} 
+                           address={activeQuestion.transaction_hash} 
+                           link={`https://sepolia.etherscan.io/tx/${activeQuestion.transaction_hash}`} 
+                           title="Transaction" 
+                         />
+                       )}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </div>
 
       <form onSubmit={handleQuestionSubmit} className={styles.questionForm}>
-        <input
-          type="text"
-          value={newQuestion}
-          onChange={(e) => setNewQuestion(e.target.value)}
-          placeholder="Ask a new question..."
-          className={styles.questionInput}
-          disabled={isSubmitting}
-        />
+        <input type="text" value={newQuestion} onChange={(e) => setNewQuestion(e.target.value)} placeholder="Ask a new question..." className={styles.questionInput} disabled={isSubmitting} />
         <button type="submit" className={styles.submitButton} disabled={isSubmitting}>
-          {isSubmitting ? 'Submitting...' : 'Send'}
+          {isSubmitting ? 'Processing...' : 'Send'}
         </button>
       </form>
     </div>

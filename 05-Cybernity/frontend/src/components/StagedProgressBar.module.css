@@ -1,0 +1,102 @@
+.container {
+  padding: 1rem;
+  width: 260px; /* Give the container a fixed width */
+  max-width: 100%; /* Ensure it doesn't overflow its parent bubble */
+  margin-left: auto; /* Center the container within the bubble */
+  margin-right: auto;
+}
+
+.stages {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.stage {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  background-color: #313244; /* Not started color */
+  border-radius: 50%;
+  border: 2px solid #45475a;
+  transition: all 0.3s ease;
+}
+
+.line {
+  flex-grow: 1;
+  height: 2px;
+  background-color: #45475a;
+  transition: background-color 0.3s ease 0.15s;
+}
+
+/* Completed state */
+.stage.completed .dot,
+.line.completed {
+  background-color: #64ffda;
+  border-color: #64ffda;
+}
+
+/* Active state */
+.stage.active .dot {
+  background-color: #cdd6f4;
+  border-color: #64ffda;
+  transform: scale(1.2);
+  box-shadow: 0 0 10px rgba(100, 255, 218, 0.5);
+}
+
+.statusContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.statusMessage {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #a6adc8;
+  margin: 0;
+  transition: color 0.3s ease;
+}
+
+/* Spinner Animation */
+.spinner {
+  animation: rotate 2s linear infinite;
+  width: 14px;
+  height: 14px;
+}
+
+.path {
+  stroke: #64ffda;
+  stroke-linecap: round;
+  animation: dash 1.5s ease-in-out infinite;
+}
+
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dash {
+  0% {
+    stroke-dasharray: 1, 150;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -35;
+  }
+  100% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -124;
+  }
+} 
