@@ -16,7 +16,7 @@ WORKDIR /build
 
 # 复制 go.mod 和 go.sum
 COPY go.mod go.sum ./
-RUN go env -w GOPROXY="https://goproxy.cn"
+# RUN go env -w GOPROXY="https://goproxy.cn"
 # 下载依赖
 RUN go mod download
 
