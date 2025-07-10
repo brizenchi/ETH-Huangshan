@@ -98,7 +98,7 @@ const ChatPage = () => {
     }
 
     if (isConfirmed) {
-      toast.success('Transaction confirmed! Polling for backend update...', { id: 'ask' });
+      toast.loading('Waiting for AI to respond...', { id: 'ask' });
       setNewQuestion('');
 
       const expectedQuestion = submittedQuestionRef.current;
@@ -126,7 +126,7 @@ const ChatPage = () => {
               setAgent(result.data);
               setQuestions(updatedQuestions);
               setActiveQuestion(updatedQuestions.find(q => q.question === expectedQuestion) || updatedQuestions[0]);
-              toast.success('Agent updated successfully!', { id: 'ask' });
+              toast.success('AI Submit on chain!', { id: 'ask' });
             }
           }
         } catch (err) {
