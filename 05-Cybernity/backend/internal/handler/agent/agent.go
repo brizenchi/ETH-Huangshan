@@ -29,6 +29,12 @@ func Generate(c *gin.Context) {
 		return
 	}
 
+	// Check file size limit (5MB)
+	if file.Size > 5*1024*1024 {
+		result.UError(c, "file size exceeds 5MB limit")
+		return
+	}
+
 	openedFile, err := file.Open()
 	if err != nil {
 		result.UError(c, "failed to open file: "+err.Error())
