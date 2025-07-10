@@ -32,8 +32,13 @@ body,
 }
 
 body {
-  /* 选用一个经典的衬线字体栈，Georgia 和 Times New Roman 是最广泛支持的，能确保在不同设备上都有一致的优雅体验。 */
-  font-family: Georgia, 'Times New Roman', Times, serif;
+  /* 
+    构建一个混合字体栈:
+    - 将英文字体(Georgia)放在前面，确保所有西文优先使用经典的衬线体。
+    - 紧随其后的是一整套优雅的、跨平台的无衬线中文字体，如苹方、微软雅黑等。
+    - 浏览器会自动为每个字符选择合适的字体，完美实现中英文的风格区分。
+  */
+  font-family: Georgia, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", sans-serif;
   background: #000; /* 曜石黑 - 主背景色 */
   color: #E6F1FF; /* 意识白 - 默认文字颜色 */
 }

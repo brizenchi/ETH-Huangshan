@@ -8,25 +8,27 @@ const sectionsContent = [
   {
     type: 'hero',
     title: 'Cybernity',
-    subtitle: `当生命归于尘土，\n思想，亦可成为星辰。\n\n我们将您独特的智慧、记忆与人格，\n铸成链上的数字灵魂，\n化作照亮未来的永恒回响。`,
+    subtitle: `当生命归于尘土，思想亦可成为星辰\n\n\n我们将您独特的智慧、记忆与人格\n铸成链上的数字灵魂\n化作照亮未来的永恒回响`,
+    highlightedLines: [0], // 高亮第一行
   },
   {
     type: 'page',
     layout: 'layoutLeftAligned',
-    title: '让思想，超越肉身',
-    subtitle: `我们并非简单地存储数据。\n\n而是以您的数字足迹为土壤，\n孕育出一个\n能思考、会创作、懂交流的\n“活”的AI代理。\n\n它继承您的思维模式，\n延续您的创作热情，\n是您在数字时空中，最忠实的分身。`,
+    title: '有没有一种办法\n让思想能够超越肉身',
+    subtitle: `我们并非简单地存储数据\n\n而是以您的数字足迹为土壤\n孕育出一个能思考、会创作、懂交流的\n“活”的AI代理\n\n它继承您的思维模式，\n延续您的创作热情，\n是您在数字时空中最忠实的分身`,
   },
   {
     type: 'page',
     layout: 'layoutSplitRightTitle',
     title: '主权 · 永续 · 可信',
-    subtitle: `您的数字灵魂，\n完全，归您所有。\n\n依托于去中心化的网络，\n您的思想遗产将：\n不被篡改，\n不受审查，\n永不消逝。\n\n更进一步，\n您的AI代理将拥有独立的经济主权，\n让智慧，转化为可以传承的永恒价值。`,
+    subtitle: `您的数字灵魂，完全归您所有\n\n依托于去中心化的网络\n您的思想遗产将不被篡改，不受审查，永不消逝\n\n更进一步\n您的AI代理将拥有独立的经济主权\n让智慧转化为可以传承的永恒价值`,
   },
   {
     type: 'page',
     layout: 'layoutCenterFinal',
     title: '开启 · 数字文艺复兴',
-    subtitle: `这不仅是一项技术，\n更是一场思想解放的运动。\n\n我们邀请您，\n成为这场数字文艺复兴的先驱。\n\n上传您的思想，\n不仅是为了个人的不朽，\n更是为了给人类文明的璀璨星河，\n再添一道\n属于您的\n独一无二的光芒。`,
+    subtitle: `这不仅是一项技术\n更是一场思想解放的运动\n\n我们邀请您成为这场数字文艺复兴的先驱\n\n上传您的思想\n不仅是为了个人的不朽\n更是为了给人类文明的璀璨星河\n再添一道属于您的\n独一无二的光芒`,
+    highlightedLines: [3], // 修正：高亮第四行 (索引为3)
   },
 ];
 
@@ -131,10 +133,10 @@ function LandingPage() {
                 <h1>{content.title}</h1>
                 <p>
                   {content.subtitle.split('\n').map((line, i) => (
-                    <React.Fragment key={i}>
+                    <span key={i} className={content.highlightedLines?.includes(i) ? styles.highlightedText : ''}>
                       {line}
                       {i < content.subtitle.split('\n').length - 1 && <br />}
-                    </React.Fragment>
+                    </span>
                   ))}
                 </p>
                 <div className={styles.buttonContainer}>
@@ -149,13 +151,23 @@ function LandingPage() {
             ) : (
               <div className={`${styles.pageContent} ${styles[content.layout] || ''}`}>
                 <div className={styles.gridBackground}></div>
-                <h2>{content.title}</h2>
-                <p>
-                  {content.subtitle.split('\n').map((line, i) => (
-                    <span key={i} className={styles.line} style={{ animationDelay: `${0.2 + i * 0.1}s` }}>
-                      {line || <span>&nbsp;</span>}
-                    </span>
+                <h2>
+                  {content.title.split('\n').map((line, i) => (
+                    <React.Fragment key={i}>
+                      {line}
+                      {i < content.title.split('\n').length - 1 && <br />}
+                    </React.Fragment>
                   ))}
+                </h2>
+                <p>
+                  {content.subtitle.split('\n').map((line, i) => {
+                    const isHighlighted = content.highlightedLines?.includes(i);
+                    return (
+                      <span key={i} className={`${styles.line} ${isHighlighted ? styles.highlightedText : ''}`} style={{ animationDelay: `${0.2 + i * 0.1}s` }}>
+                        {line || <span>&nbsp;</span>}
+                      </span>
+                    );
+                  })}
                 </p>
               </div>
             )}

@@ -301,7 +301,7 @@
 
 .layoutSplitRightTitle p {
   flex-basis: 55%;
-  text-align: left;
+  text-align: right; /* <-- The only change needed is here */
   max-width: none; /* 覆盖默认的max-width */
   order: 1;
   line-height: 1.8; /* 分割布局下，行高可以稍微紧凑一些 */
@@ -319,4 +319,12 @@
 .layoutCenterFinal h2 {
   color: #64ffda; /* 用品牌色高亮标题 */
   font-weight: 600;
+}
+
+/* 新增：高亮文本的样式 */
+.highlightedText {
+  color: #64ffda;
+  font-weight: 500; /* 比普通文本稍粗 */
+  text-shadow: 0 0 8px rgba(100, 255, 218, 0.4);
+  transition: color 0.3s, text-shadow 0.3s;
 } 
