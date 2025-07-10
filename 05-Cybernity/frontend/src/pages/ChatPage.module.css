@@ -66,10 +66,16 @@
 }
 
 .chatContainer {
-  flex-grow: 1;
+  width: 100%;
+  max-width: 900px;
+  background: rgba(12, 15, 22, 0.8);
+  border: 1px solid #313244;
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
   display: flex;
-  gap: 2rem;
-  overflow: hidden; /* Prevent container itself from scrolling */
+  flex-direction: column;
+  flex: 1; /* Allow this container to fill available space */
+  min-height: 0; /* Important fix for flexbox overflow */
 }
 
 .tabs {
@@ -104,33 +110,111 @@
   border-color: rgba(100, 255, 218, 0.5);
   color: #66fcf1;
   font-weight: 500;
+  border-bottom-color: #64ffda;
+  color: #ffffff;
 }
 
 .chatContent {
+  padding: 1.5rem;
+  background-color: rgba(22, 34, 42, 0.7);
+  border-radius: 0 8px 8px 8px;
   flex-grow: 1;
-  overflow-y: auto; /* Allow content to scroll */
+  overflow-y: auto; /* Allow vertical scrolling for long content */
 }
 
 .chatItem {
-  background: rgba(25, 28, 36, 0.6);
-  padding: 1rem;
-  border-radius: 8px;
-  border: 1px solid rgba(100, 255, 218, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .question {
-  font-weight: 500;
-  margin: 0 0 0.75rem 0;
-  color: #66fcf1;
+  font-weight: 600;
+  color: #e6f1ff;
+  flex-shrink: 0; /* 防止问题标签在flex布局中被压缩 */
 }
 
 .answer {
-  margin: 0 0 1rem 0;
+  color: #cdd6f4;
+  line-height: 1.6;
+  display: flex; /* Use flexbox for alignment */
+  align-items: flex-start; /* Align items to the top */
+}
+
+/* New: Wrapper for the markdown content to control flex behavior */
+.markdownContent {
+  flex-grow: 1; /* Allow the content to take up the remaining space */
+  min-width: 0; /* Critical fix for flexbox overflow/wrapping issues */
+}
+
+/* New: Style for the "A: " label */
+.answerLabel {
+  font-weight: 600;
+  color: #e6f1ff;
+  margin-right: 0.5rem; /* Space between label and content */
+  flex-shrink: 0; /* Prevent the label from shrinking */
+}
+
+/* Styling for markdown-generated content */
+.answer p {
+  margin: 0;
+  margin-bottom: 1em; /* Add space between paragraphs */
+}
+
+.answer p:last-child {
+  margin-bottom: 0;
+}
+
+.answer a {
+  color: #89b4fa;
+  text-decoration: none;
+  border-bottom: 1px dotted #89b4fa;
+}
+
+.answer a:hover {
+  color: #a6e3a1;
+  border-bottom-color: #a6e3a1;
+}
+
+.answer code {
+  background-color: rgba(22, 27, 42, 0.8);
+  padding: 0.2em 0.4em;
+  margin: 0;
+  font-size: 85%;
+  border-radius: 6px;
+  font-family: 'Fira Code', 'Roboto Mono', monospace;
+}
+
+.answer pre {
+  background-color: #11111b; /* A darker background for code blocks */
+  padding: 1rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  border: 1px solid #313244;
+}
+
+.answer pre code {
+  background-color: transparent;
+  padding: 0;
+  margin: 0;
+  font-size: inherit;
+  border-radius: 0;
+}
+
+.answer ul, .answer ol {
+  padding-left: 2rem;
+}
+
+.answer blockquote {
+  border-left: 3px solid #585b70;
+  padding-left: 1rem;
+  margin-left: 0;
+  color: #a6adc8;
 }
 
 .metadata {
   font-size: 0.8rem;
-  color: #a9b7d1;
+  color: #6c7086; /* Muted color */
   opacity: 0.7;
   display: flex;
   gap: 1rem;

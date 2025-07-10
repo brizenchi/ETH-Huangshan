@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import styles from './ChatPage.module.css';
 import { useWallet } from '../components/WalletProvider';
 import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
@@ -187,7 +189,14 @@ const ChatPage = () => {
           {activeQuestion ? (
             <div className={styles.chatItem}>
               <p className={styles.question}>Q: {activeQuestion.question}</p>
-              <p className={styles.answer}>A: {activeQuestion.answer}</p>
+              <div className={styles.answer}>
+                <span className={styles.answerLabel}>A:</span>
+                <div className={styles.markdownContent}>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {activeQuestion.answer}
+                  </ReactMarkdown>
+                </div>
+              </div>
               <div className={styles.metadata}>
                 <span>
                   Answer CID:{" "}
