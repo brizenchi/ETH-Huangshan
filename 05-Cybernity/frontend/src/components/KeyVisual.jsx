@@ -38,6 +38,14 @@ import Silhouette from './Silhouette';
  * 2.  **调整速度**: 降低了旋转速度，感觉更宏大、静谧。
  * 3.  **调整大小**: 减小了星星的整体尺寸，看起来更精致、遥远。
  * 4.  **调整距离**: 增大了星空球体的半径，让天幕感觉离用户更远。
+ * 
+ * v3版改进点:
+ * 1. **中空球体分布**: 星星不再挤在中心，而是分布在一个中空的球体内，为中心区域留出空间。
+ * 2. **多彩星光**: 引入了色盘，星星的颜色有了微妙的变化。
+ * 
+ * v4版改进点:
+ * 1. **星座连线**: 随机在邻近的星星之间创建优雅的连线，形成星座。
+ * 2. **性能优化**: 使用了排序算法来加速邻近星星的查找，确保动画流畅。
  */
 function CustomStars() {
   const ref = useRef();
@@ -51,7 +59,7 @@ function CustomStars() {
   });
 
   // 使用useMemo来缓存星星的几何体和圆形纹理，确保它们只被计算和创建一次，以优化性能。
-  const [geometry, texture] = useMemo(() => {
+  const [geometry, lineGeometry, texture] = useMemo(() => {
     // --- 创建圆形纹理 ---
     // 1. 创建一个临时的canvas元素
     const canvas = document.createElement('canvas');
@@ -122,26 +130,145 @@ function CustomStars() {
     geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
     geo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
     
-    return [geo, tex];
+    // --- v9: 最终平衡版星座算法 ---
+    const linePoints = [];
+    const connectionDistance = 10;
+    const maxConnectionsPerNode = 3;
+    const initialNodeProbability = 0.07; // 提升初始节点概率以增加密度
+    const propagationProbability = 0.30; // 略微提升传播几率以帮助星座成长
+    const minAngle = Math.PI / 6; 
+    const minConstellationSize = 5;
+
+    const points3D = [];
+    for (let i = 0; i < count; i++) {
+        points3D.push({
+            id: i,
+            vec: new THREE.Vector3(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]),
+            connections: 0,
+            isNode: false,
+            connectionVectors: [],
+        });
+    }
+    points3D.sort((a, b) => a.vec.x - b.vec.x);
+
+    points3D.forEach(p => {
+        if (Math.random() < initialNodeProbability) p.isNode = true;
+    });
+
+    // 步骤1: 找出所有可能的有效连接
+    const validConnections = [];
+    for (let i = 0; i < count; i++) {
+        const pointA = points3D[i];
+        if (!pointA.isNode || pointA.connections >= maxConnectionsPerNode) continue;
+
+        for (let j = i + 1; j < count; j++) {
+            const pointB = points3D[j];
+            if (pointB.vec.x - pointA.vec.x > connectionDistance) break;
+            if (pointB.connections >= maxConnectionsPerNode) continue;
+            
+            const dist = pointA.vec.distanceTo(pointB.vec);
+            if (dist < connectionDistance) {
+                const newVecA = new THREE.Vector3().subVectors(pointB.vec, pointA.vec).normalize();
+                let angleOk = true;
+                for (const existingVec of pointA.connectionVectors) if (existingVec.angleTo(newVecA) < minAngle) { angleOk = false; break; }
+                if (!angleOk) continue;
+
+                const newVecB = newVecA.clone().negate();
+                for (const existingVec of pointB.connectionVectors) if (existingVec.angleTo(newVecB) < minAngle) { angleOk = false; break; }
+                if (!angleOk) continue;
+
+                validConnections.push([pointA, pointB]);
+                
+                pointA.connections++; pointB.connections++;
+                pointA.connectionVectors.push(newVecA); pointB.connectionVectors.push(newVecB);
+                if (!pointB.isNode && Math.random() < propagationProbability) pointB.isNode = true;
+                if (pointA.connections >= maxConnectionsPerNode) break;
+            }
+        }
+    }
+
+    // 步骤2: 构建邻接表并筛选星座
+    const adj = new Map();
+    points3D.forEach(p => adj.set(p.id, []));
+    validConnections.forEach(([pA, pB]) => {
+        adj.get(pA.id).push(pB.id);
+        adj.get(pB.id).push(pA.id);
+    });
+
+    const finalLinePoints = [];
+    const visited = new Set();
+    const pointMap = new Map(points3D.map(p => [p.id, p]));
+
+    for (const p of points3D) {
+        if (!visited.has(p.id)) {
+            const componentNodeIds = [];
+            const q = [p.id];
+            visited.add(p.id);
+
+            // 步骤3: 识别一个完整的星座（连通分量）
+            while (q.length > 0) {
+                const currentId = q.shift();
+                componentNodeIds.push(currentId);
+                const neighbors = adj.get(currentId) || [];
+                for (const neighborId of neighbors) {
+                    if (!visited.has(neighborId)) {
+                        visited.add(neighborId);
+                        q.push(neighborId);
+                    }
+                }
+            }
+            
+            // 步骤4: 如果星座规模够大，则将其连线加入最终渲染列表
+            if (componentNodeIds.length >= minConstellationSize) {
+                for (const nodeId of componentNodeIds) {
+                    const neighbors = adj.get(nodeId) || [];
+                    for (const neighborId of neighbors) {
+                        if (nodeId < neighborId) { // 避免重复添加
+                            const node = pointMap.get(nodeId);
+                            const neighbor = pointMap.get(neighborId);
+                            finalLinePoints.push(node.vec.x, node.vec.y, node.vec.z);
+                            finalLinePoints.push(neighbor.vec.x, neighbor.vec.y, neighbor.vec.z);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    const lineGeo = new THREE.BufferGeometry();
+    lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(finalLinePoints, 3));
+    
+    return [geo, lineGeo, tex];
   }, []);
 
   return (
-    <points ref={ref} geometry={geometry}>
-      <pointsMaterial 
-        // 减小基础尺寸
-        size={0.3} 
-        vertexColors
-        sizeAttenuation
-        // 将我们创建的圆形纹理应用到map属性上
-        map={texture}
-        // 设置为透明，因为我们的纹理有透明部分
-        transparent={true}
-        // 设置混合模式为叠加，可以产生更亮的辉光效果
-        blending={THREE.AdditiveBlending}
-        // 关闭深度写入，这通常用于处理透明物体的渲染排序问题，可以避免一些视觉上的瑕疵
-        depthWrite={false}
-      />
-    </points>
+    <group ref={ref}>
+      <points geometry={geometry}>
+        <pointsMaterial 
+          // 减小基础尺寸
+          size={0.3} 
+          vertexColors
+          sizeAttenuation
+          // 将我们创建的圆形纹理应用到map属性上
+          map={texture}
+          // 设置为透明，因为我们的纹理有透明部分
+          transparent={true}
+          // 设置混合模式为叠加，可以产生更亮的辉光效果
+          blending={THREE.AdditiveBlending}
+          // 关闭深度写入，这通常用于处理透明物体的渲染排序问题，可以避免一些视觉上的瑕疵
+          depthWrite={false}
+        />
+      </points>
+      <lineSegments geometry={lineGeometry}>
+        <lineBasicMaterial 
+          color="white" 
+          transparent 
+          opacity={0.15}
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
+        />
+      </lineSegments>
+    </group>
   );
 }
 
