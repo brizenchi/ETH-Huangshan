@@ -25,8 +25,8 @@
 
 .appContainer {
   width: 100vw;
-  min-height: 100vh; /* Use min-height to allow content to expand */
-  /* overflow: hidden; <-- REMOVED to allow scrolling */
+  height: 100vh;
+  overflow: hidden;
   position: relative;
 }
 

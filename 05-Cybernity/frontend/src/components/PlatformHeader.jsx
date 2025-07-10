@@ -18,14 +18,14 @@ const PlatformHeader = ({ onNewAgentClick, onConnectWallet, onDisconnectWallet, 
   return (
     <header className={styles.heroHeader}>
       <div className={styles.heroContent}>
-        <h1 className={styles.title}>Welcome to the Archive</h1>
+        <h1 className={styles.title}>A Gallery of Minds</h1>
         <p className={styles.subtitle}>
-          Forge, summon, and consult your own autonomous agents. <br />
-          Your gateway to a decentralized AI collective.
+          Here, every agent is a living echo of thought, a unique consciousness on display. <br /> 
+          Forge your digital self, and witness ideas transcend the physical.
         </p>
         <div className={styles.actionsContainer}>
           <button className={styles.createButton} onClick={handleCreateAgent}>
-            <span>+</span> Create New Agent
+            Upload Your Mind
           </button>
           {isConnected ? (
             <button className={styles.walletButton} onClick={onDisconnectWallet}>

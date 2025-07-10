@@ -3,27 +3,30 @@ import { useNavigate } from 'react-router-dom';
 import styles from './LandingPage.module.css';
 import DotNav from '../components/DotNav';
 
-// 将页面内容定义为数据，方便管理
+// 对文案进行“诗化”重构，增加大量有意义的换行
 const sectionsContent = [
   {
     type: 'hero',
     title: 'Cybernity',
-    subtitle: 'Upload your mind, live forever on-chain.',
+    subtitle: `当生命归于尘土，\n思想，亦可成为星辰。\n\n我们将您独特的智慧、记忆与人格，\n铸成链上的数字灵魂，\n化作照亮未来的永恒回响。`,
   },
   {
     type: 'page',
-    title: 'The Future of Consciousness',
-    subtitle: 'Discover how we are pioneering digital immortality.',
+    layout: 'layoutLeftAligned',
+    title: '让思想，超越肉身',
+    subtitle: `我们并非简单地存储数据。\n\n而是以您的数字足迹为土壤，\n孕育出一个\n能思考、会创作、懂交流的\n“活”的AI代理。\n\n它继承您的思维模式，\n延续您的创作热情，\n是您在数字时空中，最忠实的分身。`,
   },
   {
     type: 'page',
-    title: 'Built on Secure Foundations',
-    subtitle: 'Your legacy, preserved forever on the decentralized web.',
+    layout: 'layoutSplitRightTitle',
+    title: '主权 · 永续 · 可信',
+    subtitle: `您的数字灵魂，\n完全，归您所有。\n\n依托于去中心化的网络，\n您的思想遗产将：\n不被篡改，\n不受审查，\n永不消逝。\n\n更进一步，\n您的AI代理将拥有独立的经济主权，\n让智慧，转化为可以传承的永恒价值。`,
   },
   {
     type: 'page',
-    title: 'Join The Digital Renaissance',
-    subtitle: 'Become a part of the community shaping the future.',
+    layout: 'layoutCenterFinal',
+    title: '开启 · 数字文艺复兴',
+    subtitle: `这不仅是一项技术，\n更是一场思想解放的运动。\n\n我们邀请您，\n成为这场数字文艺复兴的先驱。\n\n上传您的思想，\n不仅是为了个人的不朽，\n更是为了给人类文明的璀璨星河，\n再添一道\n属于您的\n独一无二的光芒。`,
   },
 ];
 
@@ -31,67 +34,84 @@ function LandingPage() {
   const [showLanding, setShowLanding] = useState(true);
   const [activeIndex, setActiveIndex] = useState(0);
   const [previousIndex, setPreviousIndex] = useState(null);
-  const sectionRefs = useRef([]);
-  const scrollContainerRef = useRef(null);
   const navigate = useNavigate();
+  const isWheeling = useRef(false); // Ref to prevent rapid firing
 
   const handleLaunchApp = () => {
     setShowLanding(false); // 触发落地页的退场动画
     setTimeout(() => navigate('/app'), 500); // 动画结束后再切换组件
   };
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const newIndex = parseInt(entry.target.dataset.index, 10);
-            setActiveIndex((oldIndex) => {
-              if (oldIndex !== newIndex) {
-                setPreviousIndex(oldIndex);
-              }
-              return newIndex;
-            });
-          }
-        });
-      },
-      {
-        root: scrollContainerRef.current, // 在滚动容器内观察
-        threshold: 0.5,
-      }
-    );
+  const handleNavigation = (direction) => {
+    if (isWheeling.current) return; // Exit if an animation is in progress
 
-    const refs = sectionRefs.current;
-    refs.forEach((ref) => {
-      if (ref) observer.observe(ref);
+    isWheeling.current = true;
+
+    setActiveIndex((prevIndex) => {
+      const nextIndex = direction === 'down' ? prevIndex + 1 : prevIndex - 1;
+      
+      if (nextIndex >= 0 && nextIndex < sectionsContent.length) {
+        setPreviousIndex(prevIndex);
+        return nextIndex;
+      }
+      
+      // If we are at the boundaries, do nothing
+      isWheeling.current = false; // Immediately release lock if no change
+      return prevIndex;
     });
+    
+    // Set a timeout to release the lock after the animation duration
+    setTimeout(() => {
+      isWheeling.current = false;
+    }, 800); // Animation duration + a small buffer
+  };
+  
+  useEffect(() => {
+    const handleWheel = (e) => {
+      if (e.deltaY > 0) {
+        handleNavigation('down');
+      } else if (e.deltaY < 0) {
+        handleNavigation('up');
+      }
+    };
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'ArrowDown') {
+        handleNavigation('down');
+      } else if (e.key === 'ArrowUp') {
+        handleNavigation('up');
+      }
+    };
+
+    window.addEventListener('wheel', handleWheel);
+    window.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      refs.forEach((ref) => {
-        if (ref) observer.unobserve(ref);
-      });
+      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, []); // Empty dependency array means this runs once on mount
 
   const handleDotClick = (index) => {
-    sectionRefs.current[index]?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start',
-    });
+    if (isWheeling.current || index === activeIndex) return;
+    
+    isWheeling.current = true;
+    setPreviousIndex(activeIndex);
+    setActiveIndex(index);
+    
+    setTimeout(() => {
+      isWheeling.current = false;
+    }, 800);
   };
 
   return (
     <div className={`${styles.landingPageContainer} ${!showLanding ? styles.exiting : ''}`}>
-      {/* 圆点导航层 (固定) */}
       <DotNav
         sections={sectionsContent}
         activeIndex={activeIndex}
         onDotClick={handleDotClick}
       />
-
-      {/* 内容渲染层 (固定) */}
       <div className={styles.contentContainer}>
-        {/* 全局HUD角落边框 */}
         <div className={`${styles.corner} ${styles.topLeft}`}></div>
         <div className={`${styles.corner} ${styles.topRight}`}></div>
         <div className={`${styles.corner} ${styles.bottomLeft}`}></div>
@@ -109,38 +129,40 @@ function LandingPage() {
             {content.type === 'hero' ? (
               <div className={styles.overlay}>
                 <h1>{content.title}</h1>
-                <p>{content.subtitle}</p>
+                <p>
+                  {content.subtitle.split('\n').map((line, i) => (
+                    <React.Fragment key={i}>
+                      {line}
+                      {i < content.subtitle.split('\n').length - 1 && <br />}
+                    </React.Fragment>
+                  ))}
+                </p>
                 <div className={styles.buttonContainer}>
                   <button className={styles.ctaButton} onClick={handleLaunchApp}>
-                    Launch App
+                    进入画廊
                   </button>
                   <button className={`${styles.ctaButton} ${styles.secondaryButton}`}>
-                    Join Community
+                    加入社区
                   </button>
                 </div>
               </div>
             ) : (
-              <div className={styles.pageContent}>
+              <div className={`${styles.pageContent} ${styles[content.layout] || ''}`}>
                 <div className={styles.gridBackground}></div>
                 <h2>{content.title}</h2>
-                <p>{content.subtitle}</p>
+                <p>
+                  {content.subtitle.split('\n').map((line, i) => (
+                    <span key={i} className={styles.line} style={{ animationDelay: `${0.2 + i * 0.1}s` }}>
+                      {line || <span>&nbsp;</span>}
+                    </span>
+                  ))}
+                </p>
               </div>
             )}
           </div>
         ))}
       </div>
-
-      {/* “幻影”滚动层 (可滚动) */}
-      <main ref={scrollContainerRef} className={styles.scrollContainer}>
-        {sectionsContent.map((_, index) => (
-          <section
-            key={index}
-            ref={(el) => (sectionRefs.current[index] = el)}
-            data-index={index} // 存储索引以供Observer使用
-            className={styles.sectionTrigger}
-          />
-        ))}
-      </main>
+      {/* The entire "phantom" scroll container is now REMOVED */}
     </div>
   );
 }
