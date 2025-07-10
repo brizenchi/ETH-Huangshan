@@ -28,10 +28,12 @@ body,
   height: 100%;
   margin: 0;
   padding: 0;
-  overflow: hidden; /*
+  overflow-x: hidden; /* 允许垂直滚动，但禁止水平滚动 */
+  /*
   注释：
-  添加 overflow: hidden 来防止任何潜在的内容溢出导致出现滚动条。
-  这对于保持全屏3D场景的沉浸感至关重要。
+  将 overflow: hidden 改为 overflow-x: hidden。
+  这可以防止水平方向不必要的滚动条，同时允许当内容超出屏幕高度时，
+  在垂直方向上出现滚动条，解决了页面无法滚动的问题。
   */
 }
 

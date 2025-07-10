@@ -25,9 +25,8 @@
 
 .appContainer {
   width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-  /* background-color: #000;  <-- This was hiding the KeyVisual component */
+  min-height: 100vh; /* Use min-height to allow content to expand */
+  /* overflow: hidden; <-- REMOVED to allow scrolling */
   position: relative;
 }
 

@@ -1,0 +1,86 @@
+.heroHeader {
+  padding: 4rem 2rem;
+  margin-bottom: 2rem;
+  background: 
+    linear-gradient(rgba(10, 25, 47, 0.8), rgba(10, 25, 47, 0.95)),
+    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><g fill="%231a3a5f" fill-opacity="0.1"><rect x="0" y="0" width="50" height="50" /><rect x="50" y="50" width="50" height="50" /></g></svg>');
+  border: 1px solid rgba(100, 255, 218, 0.2);
+  position: relative;
+  text-align: center;
+  color: #e6f1ff;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 30px), calc(100% - 30px) 100%, 0 100%);
+  transition: all 0.3s ease;
+}
+
+.heroHeader::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 30px;
+  height: 30px;
+  border-bottom: 2px solid #64ffda;
+  border-right: 2px solid #64ffda;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 0); /* Fix for clip path */
+}
+
+.title {
+  font-size: 3rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+  letter-spacing: 1px;
+  color: #fff;
+  text-shadow: 0 0 15px rgba(100, 255, 218, 0.5);
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  max-width: 600px;
+  margin: 0 auto 2.5rem auto;
+  color: #a6adc8;
+  line-height: 1.6;
+}
+
+.actionsContainer {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.createButton, .walletButton {
+  padding: 0.8rem 1.8rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.createButton {
+  background-color: #64ffda;
+  color: #0a192f;
+  border-color: #64ffda;
+}
+
+.createButton:hover {
+  background-color: #0a192f;
+  color: #64ffda;
+  box-shadow: 0 0 15px rgba(100, 255, 218, 0.4);
+}
+
+.walletButton {
+  background-color: transparent;
+  color: #ccd6f6;
+  border-color: rgba(100, 255, 218, 0.3);
+}
+
+.walletButton:hover {
+  background-color: rgba(100, 255, 218, 0.1);
+  border-color: rgba(100, 255, 218, 0.6);
+  color: #fff;
+} 

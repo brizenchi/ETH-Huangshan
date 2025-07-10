@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import styles from './AgentPlatform.module.css';
-import AppHeader from '../components/AppHeader';
+import PlatformHeader from '../components/PlatformHeader'; // Import the new header
 import AgentCard from '../components/AgentCard';
 import CreateAgentModal from '../components/CreateAgentModal';
+import { useWallet } from '../components/WalletProvider'; // Import wallet hook
 
 const AgentPlatform = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [agents, setAgents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { isConnected, connect, disconnect, address } = useWallet(); // Get wallet state and functions
 
   useEffect(() => {
     const fetchAgents = async () => {
@@ -59,7 +61,13 @@ const AgentPlatform = () => {
 
   return (
     <div className={styles.container}>
-      <AppHeader onNewAgentClick={handleOpenModal} />
+      <PlatformHeader 
+        onNewAgentClick={handleOpenModal}
+        onConnectWallet={connect}
+        onDisconnectWallet={disconnect}
+        isConnected={isConnected}
+        address={address}
+      />
       <main className={styles.agentList}>
         {loading && <p className={styles.message}>Loading agents...</p>}
         {error && <p className={styles.error}>Error: {error}</p>}
