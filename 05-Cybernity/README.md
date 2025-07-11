@@ -81,6 +81,20 @@ npm run dev
 ```
 > 前端应用默认运行于 `http://localhost:5173`。
 
+### karl-marx启动
+
+```bash
+# 1. (在另一个终端中) 进入前端目录
+cd karl-marx
+
+# 2. 完成配置内容
+cp .env.example .env
+
+# 3. 运行服务器
+elizaos dev
+```
+> 服务应用默认运行于 `http://localhost:3000`。
+
 ---
 
 ## 4. 我们的愿景：思想的画廊

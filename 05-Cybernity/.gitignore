@@ -7,3 +7,6 @@ deployment/*
 .vscode
 __debug*
 cybernity
+.eliza
+dist
+node_modules
