@@ -12,17 +12,17 @@ const AgentCard = ({ agent }) => {
   };
 
   return (
-    <div className={styles.card} onClick={handleCardClick}>
-      <div className={styles.mainContent}>
+    <div className={styles.card}>
+      <div className={styles.mainContent} onClick={handleCardClick}>
         <AgentAvatar address={agent.address} size={64} />
         <div className={styles.textWrapper}>
           <h3 className={styles.name}>{agent.name}</h3>
           <p className={styles.bio}>{agent.bio}</p>
         </div>
       </div>
-      <div className={styles.consultFooter}>
-        <span>Consult</span>
-      </div>
+      <button className={styles.consultButton} onClick={handleCardClick}>
+        Consult
+      </button>
     </div>
   );
 };

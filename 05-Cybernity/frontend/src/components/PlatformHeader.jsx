@@ -18,14 +18,14 @@ const PlatformHeader = ({ onNewAgentClick, onConnectWallet, onDisconnectWallet, 
   return (
     <header className={styles.heroHeader}>
       <div className={styles.heroContent}>
-        <h1 className={styles.title}>A Gallery of Minds</h1>
+        <h1 className={styles.title}>思维画廊</h1>
         <p className={styles.subtitle}>
-          Here, every agent is a living echo of thought, a unique consciousness on display. <br /> 
-          Forge your digital self, and witness ideas transcend the physical.
+          在这里，每个智能体都是思维的回声，都是独特意识的展现。<br />
+          塑造你的数字化自我，见证思想超越物理界限。
         </p>
         <div className={styles.actionsContainer}>
           <button className={styles.createButton} onClick={handleCreateAgent}>
-            Upload Your Mind
+            上传你的思维
           </button>
           {isConnected ? (
             <button className={styles.walletButton} onClick={onDisconnectWallet}>
@@ -33,7 +33,7 @@ const PlatformHeader = ({ onNewAgentClick, onConnectWallet, onDisconnectWallet, 
             </button>
           ) : (
             <button className={styles.walletButton} onClick={onConnectWallet}>
-              Connect Wallet
+              连接钱包
             </button>
           )}
         </div>

@@ -3,19 +3,17 @@
 /* ======================================= */
 .card {
   width: 320px;
-  height: 220px;
   box-sizing: border-box;
   background: rgba(25, 28, 36, 0.6);
   border: 1px solid rgba(100, 255, 218, 0.2);
   border-radius: 8px;
-  padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   transition: all 0.3s ease;
-  cursor: pointer;
+  cursor: default;
+  overflow: hidden;
 }
 
 .card:hover {
@@ -48,22 +46,24 @@
   display: flex;
   align-items: flex-start;
   gap: 1.5rem;
-  overflow: hidden; /* Prevent content from spilling out */
+  overflow: hidden;
+  padding: 1.5rem;
+  cursor: pointer;
 }
 
 .textWrapper {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem; /* 在姓名和简介之间添加间距 */
+  gap: 0.5rem;
   flex-grow: 1;
-  min-width: 0; /* 关键：让内部的文本溢出省略生效 */
+  min-width: 0;
 }
 
 .name {
   font-size: 1.25rem;
   font-weight: 600;
   color: #fff;
-  margin: 0; /* 移除所有默认外边距 */
+  margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -74,7 +74,6 @@
   color: #a9b7d1;
   line-height: 1.5;
   margin: 0;
-  /* Truncate text after 3 lines */
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
@@ -85,24 +84,53 @@
 /* ======================================= */
 /*          3. 按钮区域 (底部)             */
 /* ======================================= */
-.consultFooter {
-  height: 40px; /* 关键：固定高度 */
-  flex-shrink: 0; /* 关键：禁止此区域收缩 */
+.consultButton {
+  height: 40px;
+  flex-shrink: 0;
   display: flex;
-  align-items: center; /* 关键：垂直居中 */
-  justify-content: center; /* 关键：水平居中 */
-
-  background-color: rgba(0, 122, 133, 0.4);
-  color: rgba(255, 255, 255, 0.85);
-  font-weight: 500;
-  letter-spacing: 0.5px;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(90deg, rgba(0, 122, 133, 0.4), rgba(0, 188, 204, 0.4));
+  color: #e0f2f1;
+  font-weight: 600;
+  letter-spacing: 1px;
+  border: none;
+  border-radius: 0 0 8px 8px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  border-top: 1px solid rgba(0, 255, 255, 0.2);
+  transition: all 0.3s ease-in-out;
+  position: relative;
+  overflow: hidden;
+  text-transform: uppercase;
 }
 
-.consultFooter:hover {
-  background-color: rgba(0, 188, 204, 0.5);
-  color: #fff;
-  box-shadow: 0 0 20px rgba(0, 225, 255, 0.4);
-} 
+.consultButton::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -100%;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.8));
+  transition: left 0.4s ease;
+}
+
+.consultButton:hover::before {
+  left: 100%;
+}
+
+.consultButton::after {
+  content: '→';
+  margin-left: 8px;
+  transition: transform 0.3s ease;
+}
+
+.consultButton:hover {
+  background: linear-gradient(90deg, rgba(0, 188, 204, 0.5), rgba(0, 225, 255, 0.5));
+  color: #ffffff;
+  box-shadow: 0 0 25px rgba(0, 255, 255, 0.6);
+  transform: scale(1.05);
+}
+
+.consultButton:hover::after {
+  transform: translateX(5px);
+}
