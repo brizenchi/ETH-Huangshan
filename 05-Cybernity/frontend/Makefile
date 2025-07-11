@@ -1,8 +1,6 @@
 # Default to localhost if API_HOST is not set
 APP_NAME := cybernity-frontend
 USERNAME := root
-SERVER_IP := 47.116.173.33
-SERVER_PORT := 3010
 SERVER_PATH := /$(USERNAME)/$(APP_NAME)
 DOCKER_TAG := latest
 
@@ -30,17 +28,6 @@ down:
 	@docker stop $(APP_NAME) || true
 	@docker rm $(APP_NAME) || true
 
-deploy:
-	@echo "Deploying to production server..."
-	ssh $(USERNAME)@$(SERVER_IP) '\
-		cd $(SERVER_PATH) && \
-		echo "$(PWD)" && \
-		git pull origin dev && \
-		git checkout dev && \
-		sudo make backup && \
-		sudo make build && \
-		sudo make remove && \
-		sudo make run'
 remove:
 	@docker rm -f $(APP_NAME)
 

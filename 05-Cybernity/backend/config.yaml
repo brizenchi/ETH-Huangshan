@@ -1,0 +1,42 @@
+name: cybernity          
+run_mode: dev # dev, test, release                                                                                                                                   
+addr: 0.0.0.0:8080
+timezone: UTC
+
+jwt:                  
+  secret: ""
+  expires_at_hours: 7200
+
+log:
+  app_name: cybernity
+  file_path: ./deployment/logs/
+  file_name: cybernity
+  level: 5 # PanicLevel=0, FatalLevel=1, ErrorLevel=2, WarnLevel=3, InfoLevel=4, DebugLevel=5, TraceLevel=6                                                          
+
+llm:
+  configs:
+    default:
+      api_key: 
+      base_url: 
+      timeout: 
+      max_concurrent_calls: 
+      model: 
+
+eth:
+  ws_url: 
+  contract_address: 
+
+pinata:
+  gateway_url: 
+  jwt: 
+
+postgres:
+  cybernity: 
+    host: 
+    port: 
+    database: 
+    user: 
+    password: 
+    max_idle_conns: 
+    max_open_conns: 
+    max_lifetime: 

@@ -1,8 +1,6 @@
 # 变量定义
 APP_NAME := cybernity
 USERNAME := root
-SERVER_IP := 47.116.173.33
-SERVER_PORT := 8120
 SERVER_PATH := /$(USERNAME)/$(APP_NAME)
 DOCKER_TAG := latest
 
@@ -31,7 +29,7 @@ clean:
 	@rm -f $(APP_NAME)
 	@go clean -cache
 	@docker system prune -f
-
+`
 # 运行测试
 test:
 	@echo "Running tests..."
@@ -80,18 +78,6 @@ backup:
 	else \
 		echo "No previous $(APP_NAME):latest found, skipping backup"; \
 	fi
-
-deploy:
-	@echo "Deploying to production server..."
-	ssh $(USERNAME)@$(SERVER_IP) '\
-		cd $(SERVER_PATH) && \
-		echo "$(PWD)" && \
-		git pull origin dev && \
-		git checkout dev && \
-		sudo make backup && \
-		sudo make docker-build && \
-		sudo make remove && \
-		sudo make run'
 	
 rollback:
 	@echo "Rolling back to previous version..."
