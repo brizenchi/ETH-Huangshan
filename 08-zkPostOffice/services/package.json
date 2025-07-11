@@ -1,0 +1,43 @@
+{
+  "name": "zk-proof-service",
+  "version": "1.0.0",
+  "description": "ZK Proof Generation Service for ZKVault",
+  "main": "zkProofService.js",
+  "scripts": {
+    "start": "node zkProofService.js",
+    "dev": "nodemon zkProofService.js",
+    "test": "node testClient.js",
+    "test:workflow": "node testClient.js --workflow",
+    "test:watch": "nodemon testClient.js",
+    "demo": "node demo.js",
+    "demo:send": "node demo.js --send",
+    "demo:claim": "node demo.js --claim",
+    "demo:performance": "node demo.js --performance",
+    "status": "node checkStatus.js"
+  },
+  "keywords": [
+    "zk-proof",
+    "zero-knowledge",
+    "snarkjs",
+    "circom",
+    "blockchain",
+    "api"
+  ],
+  "author": "ZK Post Office",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "axios": "^1.6.2",
+    "ethers": "^6.8.0",
+    "snarkjs": "^0.7.5",
+    "circomlib": "^2.0.5",
+    "ffjavascript": "^0.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
