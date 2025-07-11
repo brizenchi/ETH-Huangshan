@@ -27,7 +27,7 @@ const CreateAgentModal = ({ isOpen, onClose, onAgentCreated }) => {
   const [apiData, setApiData] = useState(null);
   const isFinalizing = useRef(false);
   const toastIdRef = useRef(null);
-  
+
   const { data: hash, writeContract, isPending, error: contractError } = useWriteContract();
 
   // Reset form state when modal opens/closes
@@ -115,14 +115,14 @@ const CreateAgentModal = ({ isOpen, onClose, onAgentCreated }) => {
           1000000000000n 
         ],
       });
-
+      
     } catch (err) {
       setError(err.message);
-      toast.error(err.message, { id: toastIdRef.current });
+        toast.error(err.message, { id: toastIdRef.current });
       setIsSubmitting(false);
     }
   };
-
+  
   // Listen for wallet submission error
   useEffect(() => {
     if (contractError) {
@@ -153,12 +153,12 @@ const CreateAgentModal = ({ isOpen, onClose, onAgentCreated }) => {
           toast.success('Agent created successfully!', { id: toastIdRef.current });
           onAgentCreated(apiData);
         } catch (err) {
-          toast.error(`Finalization failed: ${err.message}`, { id: toastIdRef.current });
+            toast.error(`Finalization failed: ${err.message}`, { id: toastIdRef.current });
         } finally {
           setIsSubmitting(false);
         }
       };
-      
+
       finalizeRegistration();
     }
   }, [isConfirmed, apiData, onAgentCreated]);
@@ -187,19 +187,19 @@ const CreateAgentModal = ({ isOpen, onClose, onAgentCreated }) => {
           <button className={styles.closeButton} onClick={onClose} disabled={isBusy}>
             <XIcon />
           </button>
-          <form onSubmit={handleSubmit} className={styles.form}>
+        <form onSubmit={handleSubmit} className={styles.form}>
             <h2 className={styles.title}>Create Your Digital Twin</h2>
             
             <div className={styles.inputGroup}>
-              <label htmlFor="name">Name</label>
+            <label htmlFor="name">Name</label>
               <div className={styles.inputWrapper}>
                 <UserIcon />
                 <input type="text" id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Isaac Asimov" required disabled={isBusy} />
               </div>
-            </div>
+          </div>
 
             <div className={styles.inputGroup}>
-              <label htmlFor="description">Description</label>
+            <label htmlFor="description">Description</label>
               <div className={styles.inputWrapper}>
                 <FileTextIcon />
                 <textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="e.g. A science fiction writer and professor of biochemistry." rows="3" disabled={isBusy} />
@@ -241,30 +241,30 @@ const CreateAgentModal = ({ isOpen, onClose, onAgentCreated }) => {
                     <span>(Max file size 5MB)</span>
                   </div>
                 )}
-              </div>
-            </div>
+          </div>
+          </div>
 
             <div className={styles.inputGroup}>
-                <label>Creator Address</label>
+            <label>Creator Address</label>
                 <div className={styles.addressDisplay}>{address || 'Please connect your wallet'}</div>
-            </div>
+          </div>
             
             {error && <p className={styles.errorText}>{error}</p>}
 
             <div className={styles.buttonGroup}>
               <button type="button" className={styles.cancelButton} onClick={onClose} disabled={isBusy}>
-                Cancel
-              </button>
+              Cancel
+            </button>
               <button type="submit" className={styles.submitButton} disabled={isBusy || !address}>
                 {isBusy ? (
-                  <>
-                    <div className={styles.spinner}></div>
-                    {getButtonText()}
-                  </>
+                <>
+                  <div className={styles.spinner}></div>
+                  {getButtonText()}
+                </>
                 ) : 'Create Agent'}
-              </button>
-            </div>
-          </form>
+            </button>
+          </div>
+        </form>
         </div>
       </div>
     </div>

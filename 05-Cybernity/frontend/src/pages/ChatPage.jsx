@@ -201,8 +201,8 @@ const ChatPage = () => {
         if (pollingRef.current) {
           clearInterval(pollingRef.current);
           pollingRef.current = null;
-        }
-      };
+      }
+    };
     }
   }, [isPending, isConfirming, isConfirmed, confirmationError, reset, updateLoadingQuestion, pollingTask]);
 
@@ -287,7 +287,7 @@ const ChatPage = () => {
                          link={`https://amethyst-tragic-marlin-192.mypinata.cloud/ipfs/${activeQuestion.answer_cid}`} 
                          title="Answer CID" 
                        />
-                       {activeQuestion.transaction_hash && (
+                {activeQuestion.transaction_hash && (
                          <IconAddressLink 
                            IconComponent={TransactionIcon} 
                            address={activeQuestion.transaction_hash} 
